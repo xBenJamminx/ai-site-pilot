@@ -1,5 +1,8 @@
 # ai-site-pilot
 
+[![npm version](https://img.shields.io/npm/v/ai-site-pilot)](https://www.npmjs.com/package/ai-site-pilot)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?logo=ko-fi)](https://ko-fi.com/xBenJamminx)
+
 AI chat widget that can **control and navigate your website**. Unlike typical chatbots that just answer questions, Site Pilot can take actions—scroll to sections, open modals, filter content, and more.
 
 ## Features
@@ -10,6 +13,28 @@ AI chat widget that can **control and navigate your website**. Unlike typical ch
 - 🎨 **Themeable** - CSS variables for easy customization
 - 📱 **Responsive** - Works on all screen sizes
 - ⚡ **Vercel AI SDK** - Works with any LLM provider
+
+## How It Works
+
+The package provides the chat UI and streaming infrastructure. **You teach the AI about your specific site** through:
+
+1. **System Prompt** - Tell the AI what sections, data, and features exist on your site
+2. **Tool Definitions** - Define what actions the AI can take (filter, navigate, open modals)
+3. **Client Handlers** - Write the code that actually executes those actions
+
+```
+User: "Show me your mobile apps"
+         ↓
+   AI understands request
+         ↓
+   AI calls filter_by_category("Mobile") tool
+         ↓
+   Your handler receives the call
+         ↓
+   Your code filters the UI
+```
+
+The AI doesn't automatically know your site structure—you teach it via the system prompt. See the [complete example](#teaching-the-ai-your-site) below.
 
 ## Installation
 

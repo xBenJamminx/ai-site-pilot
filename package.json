@@ -54,6 +54,10 @@
   ],
   "author": "Ben.Builds",
   "license": "MIT",
+  "funding": {
+    "type": "ko_fi",
+    "url": "https://ko-fi.com/xBenJamminx"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/xBenJamminx/ai-site-pilot"
