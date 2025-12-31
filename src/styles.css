@@ -1,0 +1,238 @@
+/**
+ * ai-site-pilot default styles
+ *
+ * These styles use CSS custom properties for theming.
+ * Override these variables to customize the appearance:
+ *
+ * --pilot-accent: The accent color (default: amber)
+ * --pilot-bg: Background color (default: #0F0720)
+ * --pilot-text: Text color (default: white)
+ * --pilot-text-muted: Muted text color (default: #a1a1aa)
+ * --pilot-border: Border color (default: rgba(255,255,255,0.1))
+ * --pilot-radius: Border radius (default: 24px)
+ */
+
+.pilot-container {
+  --pilot-bg: #0F0720;
+  --pilot-bg-95: rgba(15, 7, 32, 0.95);
+  --pilot-text: #ffffff;
+  --pilot-text-muted: #a1a1aa;
+  --pilot-border: rgba(255, 255, 255, 0.1);
+  --pilot-border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Accent color - can be overridden */
+  --pilot-accent-h: 38;
+  --pilot-accent-s: 92%;
+  --pilot-accent-l: 50%;
+  --pilot-accent: hsl(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l));
+  --pilot-accent-light: hsl(var(--pilot-accent-h), var(--pilot-accent-s), 60%);
+  --pilot-accent-dark: hsl(var(--pilot-accent-h), var(--pilot-accent-s), 40%);
+  --pilot-accent-glow: hsla(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l), 0.2);
+  --pilot-accent-glow-strong: hsla(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l), 0.3);
+}
+
+/* Panel */
+.pilot-panel {
+  background: var(--pilot-bg-95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--pilot-border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* Text colors */
+.pilot-text {
+  color: var(--pilot-text);
+}
+
+.pilot-text-muted {
+  color: var(--pilot-text-muted);
+}
+
+/* Borders */
+.pilot-border-bottom {
+  border-bottom: 1px solid var(--pilot-border-subtle);
+}
+
+.pilot-border-top {
+  border-top: 1px solid var(--pilot-border-subtle);
+}
+
+/* Avatar/Icon container */
+.pilot-avatar {
+  background: linear-gradient(135deg, var(--pilot-accent), var(--pilot-accent-dark));
+  box-shadow: 0 4px 14px var(--pilot-accent-glow);
+}
+
+/* Status dot */
+.pilot-status-dot {
+  background: #34d399;
+}
+
+/* Messages */
+.pilot-message-user {
+  background: linear-gradient(135deg, var(--pilot-accent), var(--pilot-accent-dark));
+  color: var(--pilot-text);
+}
+
+.pilot-message-assistant {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e4e4e7;
+  border: 1px solid var(--pilot-border-subtle);
+}
+
+/* Prose styling for markdown */
+.pilot-prose {
+  line-height: 1.6;
+}
+
+.pilot-prose p {
+  margin: 0.375rem 0;
+  color: #e4e4e7;
+}
+
+.pilot-prose strong {
+  color: var(--pilot-text);
+}
+
+.pilot-prose a {
+  color: var(--pilot-accent);
+}
+
+.pilot-prose code {
+  color: var(--pilot-accent-light);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* Cursor for streaming */
+.pilot-cursor {
+  background: var(--pilot-accent);
+}
+
+/* Loading indicator */
+.pilot-loading {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--pilot-border-subtle);
+}
+
+.pilot-loading-dot {
+  background: var(--pilot-text-muted);
+}
+
+/* Suggestions */
+.pilot-suggestion {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--pilot-border);
+  color: #d4d4d8;
+}
+
+.pilot-suggestion:hover {
+  background: var(--pilot-accent-glow);
+  border-color: hsla(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l), 0.3);
+  color: var(--pilot-accent-light);
+}
+
+/* Pagination dots */
+.pilot-dot-active {
+  background: var(--pilot-accent);
+}
+
+.pilot-dot-inactive {
+  background: #52525b;
+}
+
+/* Input area */
+.pilot-input-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  border: 1px solid var(--pilot-border);
+}
+
+.pilot-input-container:focus-within {
+  border-color: hsla(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l), 0.5);
+}
+
+.pilot-input {
+  color: var(--pilot-text);
+}
+
+.pilot-input::placeholder {
+  color: #71717a;
+}
+
+/* Buttons */
+.pilot-button-active {
+  background: var(--pilot-accent-glow);
+  color: var(--pilot-accent);
+}
+
+.pilot-button-inactive {
+  color: #71717a;
+}
+
+.pilot-button-inactive:hover {
+  color: var(--pilot-text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Mic button */
+.pilot-mic-active {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.pilot-mic-inactive {
+  color: #a1a1aa;
+}
+
+.pilot-mic-inactive:hover {
+  color: var(--pilot-text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Send button */
+.pilot-send-active {
+  background: var(--pilot-accent);
+  color: #000000;
+}
+
+.pilot-send-active:hover {
+  background: var(--pilot-accent-light);
+}
+
+.pilot-send-inactive {
+  background: rgba(255, 255, 255, 0.05);
+  color: #71717a;
+}
+
+/* Toggle button */
+.pilot-toggle-button {
+  background: linear-gradient(135deg, var(--pilot-accent), var(--pilot-accent-dark));
+  color: var(--pilot-text);
+  box-shadow: 0 10px 25px var(--pilot-accent-glow);
+}
+
+.pilot-toggle-button:hover {
+  box-shadow: 0 10px 25px var(--pilot-accent-glow-strong);
+}
+
+/* Scrollbar */
+.pilot-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pilot-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pilot-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.pilot-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
