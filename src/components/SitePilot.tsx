@@ -41,9 +41,16 @@ export function SitePilot({
   className = '',
 }: SitePilotProps) {
   const {
-    accent = 'amber',
     position = 'bottom-right',
     borderRadius = 24,
+    accentColor,
+    accentColorDark,
+    backgroundColor,
+    textColor,
+    textMutedColor,
+    borderColor,
+    userMessageBg,
+    assistantMessageBg,
   } = theme;
 
   const {
@@ -148,8 +155,15 @@ export function SitePilot({
 
   // CSS custom properties for theming
   const cssVars = {
-    '--pilot-accent': accent,
     '--pilot-radius': `${borderRadius}px`,
+    ...(accentColor && { '--pilot-accent': accentColor }),
+    ...(accentColorDark && { '--pilot-accent-dark': accentColorDark }),
+    ...(backgroundColor && { '--pilot-bg': backgroundColor, '--pilot-bg-95': `${backgroundColor}f2` }),
+    ...(textColor && { '--pilot-text': textColor }),
+    ...(textMutedColor && { '--pilot-text-muted': textMutedColor }),
+    ...(borderColor && { '--pilot-border': borderColor }),
+    ...(userMessageBg && { '--pilot-user-bg': userMessageBg }),
+    ...(assistantMessageBg && { '--pilot-assistant-bg': assistantMessageBg }),
   } as React.CSSProperties;
 
   return (

@@ -71,12 +71,12 @@
 
 /* Messages */
 .pilot-message-user {
-  background: linear-gradient(135deg, var(--pilot-accent), var(--pilot-accent-dark));
+  background: var(--pilot-user-bg, linear-gradient(135deg, var(--pilot-accent), var(--pilot-accent-dark)));
   color: var(--pilot-text);
 }
 
 .pilot-message-assistant {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--pilot-assistant-bg, rgba(255, 255, 255, 0.05));
   color: #e4e4e7;
   border: 1px solid var(--pilot-border-subtle);
 }

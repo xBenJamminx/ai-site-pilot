@@ -30,14 +30,30 @@ export interface Suggestion {
   icon?: string;
 }
 
-// Theme configuration
+// Theme configuration - all colors accept CSS color values (hex, rgb, hsl, etc.)
 export interface SitePilotTheme {
-  /** Accent color name (e.g., 'amber', 'blue', 'green') or CSS color */
-  accent?: string;
   /** Position of the chat panel */
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
   /** Border radius in pixels */
   borderRadius?: number;
+
+  // Color customization - accepts any CSS color value
+  /** Primary accent color (buttons, highlights) - e.g., '#f59e0b' or 'rgb(245, 158, 11)' */
+  accentColor?: string;
+  /** Secondary accent color for gradients - defaults to darker version of accentColor */
+  accentColorDark?: string;
+  /** Panel background color - e.g., '#0F0720' */
+  backgroundColor?: string;
+  /** Primary text color - e.g., '#ffffff' */
+  textColor?: string;
+  /** Muted/secondary text color - e.g., '#a1a1aa' */
+  textMutedColor?: string;
+  /** Border color - e.g., 'rgba(255,255,255,0.1)' */
+  borderColor?: string;
+  /** User message background (gradient start) */
+  userMessageBg?: string;
+  /** Assistant message background */
+  assistantMessageBg?: string;
 }
 
 // Feature toggles
