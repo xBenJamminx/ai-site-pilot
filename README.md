@@ -101,9 +101,18 @@ Main chat widget component.
 
 ```typescript
 interface SitePilotTheme {
-  accent?: string;      // 'amber', 'blue', or CSS color
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
   borderRadius?: number;
+
+  // Colors - all accept CSS color values (hex, rgb, hsl)
+  accentColor?: string;         // Primary accent '#f59e0b'
+  accentColorDark?: string;     // Gradient end '#d97706'
+  backgroundColor?: string;      // Panel background '#0F0720'
+  textColor?: string;           // Primary text '#ffffff'
+  textMutedColor?: string;      // Secondary text '#a1a1aa'
+  borderColor?: string;         // Border 'rgba(255,255,255,0.1)'
+  userMessageBg?: string;       // User message bubble
+  assistantMessageBg?: string;  // Assistant message bubble
 }
 ```
 
