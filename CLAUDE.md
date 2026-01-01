@@ -217,7 +217,7 @@ const showServiceTool = defineTool({
 
 // Create handler with site content - prompt is auto-generated!
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash',
+  model: 'google/gemini-2.5-flash-lite',
   siteContent: {
     name: 'Acme Dance Studio',
     type: 'dance studio',
@@ -310,7 +310,7 @@ If you need full control, use `systemPrompt` instead of `siteContent`:
 
 ```typescript
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash',
+  model: 'google/gemini-2.5-flash-lite',
   systemPrompt: `You are an assistant for Acme Dance Studio.
 
 ## Classes
@@ -512,7 +512,7 @@ Use `siteContent` to provide actual data about your site. The AI only knows what
 
 | Model | ID | Notes |
 |-------|-----|-------|
-| Gemini 2.0 Flash | `google/gemini-2.0-flash` | Fast, affordable (default) |
+| Gemini 2.5 Flash-Lite | `google/gemini-2.5-flash-lite` | Fast, affordable (default) |
 | GPT-4o | `openai/gpt-4o` | Best overall |
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |

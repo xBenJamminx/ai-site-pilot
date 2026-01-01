@@ -81,7 +81,7 @@ const navigateTool = defineTool({
 });
 
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash',  // Or use any OpenRouter model
+  model: 'google/gemini-2.5-flash-lite',  // Or use any OpenRouter model
   systemPrompt: `You are a helpful assistant for our website.
 You can navigate users to different sections using the navigate tool.`,
   tools: [navigateTool],
@@ -132,7 +132,7 @@ Change the `model` string to use any model:
 
 | Model | ID | Notes |
 |-------|-----|-------|
-| Gemini 2.0 Flash | `google/gemini-2.0-flash` | Fast, affordable (default) |
+| Gemini 2.5 Flash-Lite | `google/gemini-2.5-flash-lite` | Fast, affordable (default) |
 | GPT-4o | `openai/gpt-4o` | Best overall |
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
@@ -151,7 +151,7 @@ Creates a Next.js API route handler. You can use either `systemPrompt` (manual) 
 import { createHandler } from 'ai-site-pilot/api';
 
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash',
+  model: 'google/gemini-2.5-flash-lite',
   siteContent: {
     name: 'Acme Dance Studio',
     type: 'dance studio',
@@ -197,7 +197,7 @@ createHandler({
 
   // Optional
   apiKey: process.env.OPENROUTER_API_KEY,  // Uses env var by default
-  model: 'google/gemini-2.0-flash',  // Default (free!)
+  model: 'google/gemini-2.5-flash-lite',  // Default (free!)
   tools: [myTool1, myTool2],
   temperature: 0.7,
   siteUrl: 'https://mysite.com',  // Shown in OpenRouter dashboard

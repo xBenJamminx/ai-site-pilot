@@ -90,7 +90,7 @@ function convertTools(tools: ToolDefinition[]): OpenRouterTool[] {
  * Create a Next.js API route handler using OpenRouter
  *
  * Works with any model - just change the model string:
- * - 'google/gemini-2.0-flash'
+ * - 'google/gemini-2.5-flash-lite'
  * - 'openai/gpt-4o'
  * - 'anthropic/claude-3.5-sonnet'
  * - 'meta-llama/llama-3.1-70b-instruct'
@@ -110,7 +110,7 @@ function convertTools(tools: ToolDefinition[]): OpenRouterTool[] {
 export function createHandler(config: HandlerConfig) {
   const {
     apiKey = process.env.OPENROUTER_API_KEY,
-    model = 'google/gemini-2.0-flash',
+    model = 'google/gemini-2.5-flash-lite',
     tools = [],
     temperature = 0.7,
     siteUrl,
