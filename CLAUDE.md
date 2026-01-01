@@ -88,20 +88,69 @@ export function ClassList() {
 
 **Update `lib/data.ts` → Both site AND chatbot update automatically.**
 
-### When Setting Up a New Project
+### Route Discovery Checklist (CRITICAL)
 
-As an AI assistant, you should:
+Before setting up ai-site-pilot, you MUST discover all routes and content. Missing pages leads to broken navigation.
 
-1. **Scan the codebase** for existing data files:
-   - `constants.ts`, `data.ts`, `config.ts`
-   - `lib/`, `data/`, `content/` directories
-   - JSON files with site content
+**Step 1: Enumerate ALL routes**
+```bash
+# Find all page files (Next.js App Router)
+find src/app -name "page.tsx" -o -name "page.js" | sort
 
-2. **Identify the data structure** - What does the site display? Products? Services? Team members?
+# Or for Pages Router
+find src/pages -name "*.tsx" -o -name "*.js" | grep -v "_" | sort
+```
 
-3. **Create the API route** that imports from these existing sources
+**Step 2: Build the pages array from actual routes**
+```typescript
+// Map file paths to route names
+// src/app/page.tsx → 'home'
+// src/app/about/page.tsx → 'about'
+// src/app/classes/page.tsx → 'classes'
+// src/app/contact/page.tsx → 'contact'
 
-4. **Never duplicate data** - If you can't find existing data files, create ONE shared file that both the site and chatbot use
+pages: ['home', 'about', 'classes', 'contact']  // Must match actual routes!
+```
+
+**Step 3: Find data sources for each page**
+For each page.tsx, check:
+- Inline data arrays (e.g., `const classes = [...]`)
+- Imported data (e.g., `import { CLASSES } from '@/lib/data'`)
+- Component props passed from parent layouts
+- API calls or database queries
+
+**Step 4: Consolidate into shared data file**
+If data is scattered, create a shared file:
+```typescript
+// lib/data.ts - Single source of truth
+export const SITE_INFO = { name: '...', email: '...', phone: '...' };
+export const CLASSES = [...];
+export const TEACHERS = [...];
+export const FAQS = [...];
+```
+
+**Step 5: Verify navigation tool enum matches routes**
+```typescript
+const navigateTool = defineTool({
+  name: 'navigate_to_section',
+  parameters: {
+    properties: {
+      section: {
+        type: 'string',
+        // This MUST include all navigable pages/sections
+        enum: ['home', 'about', 'classes', 'teachers', 'schedule', 'contact'],
+      },
+    },
+  },
+});
+```
+
+### Common Mistakes to Avoid
+
+1. **Missing subpages** - Check for nested routes like `/about/team`, `/about/history`
+2. **Hardcoded pages array** - Don't copy from templates; verify against actual routes
+3. **Stale navigation enums** - If you add a new page, update the tool enum
+4. **Duplicated data** - Always import from shared source, never copy values
 
 ## Quick Setup (Recommended)
 
