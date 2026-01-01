@@ -31,6 +31,9 @@ export { Suggestions } from './components/Suggestions';
 export { useChat } from './hooks/useChat';
 export { useSpeech } from './hooks/useSpeech';
 
+// Tools
+export { createFallbackMessageGenerator, createToolRegistry, defineTool, defineSimpleTool, ToolRegistry } from './tools';
+
 // Types
 export type {
   ChatMessage as ChatMessageType,

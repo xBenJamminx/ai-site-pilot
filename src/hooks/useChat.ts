@@ -14,6 +14,9 @@ export interface UseChatOptions {
   onStreamStart?: () => void;
   /** Callback when streaming ends */
   onStreamEnd?: () => void;
+  /** Generate a fallback message when AI uses tools but provides no text.
+   * If not provided, uses a generic fallback message. */
+  generateFallbackMessage?: (toolCalls: ToolExecution[]) => string;
 }
 
 export interface UseChatReturn {
@@ -39,7 +42,7 @@ export interface UseChatReturn {
  * Hook for managing chat state and streaming
  */
 export function useChat(options: UseChatOptions): UseChatReturn {
-  const { apiEndpoint, initialMessages = [], onToolCall, onStreamStart, onStreamEnd } = options;
+  const { apiEndpoint, initialMessages = [], onToolCall, onStreamStart, onStreamEnd, generateFallbackMessage } = options;
 
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState('');
@@ -164,8 +167,17 @@ export function useChat(options: UseChatOptions): UseChatReturn {
                     );
                   }
 
-                  // If no text, show default message
-                  if (!fullText) {
+                  // If no text, generate contextual fallback based on tools used
+                  if (!fullText && toolCalls.length > 0 && generateFallbackMessage) {
+                    const fallbackMessage = generateFallbackMessage(toolCalls);
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === assistantMessageId
+                          ? { ...m, content: fallbackMessage }
+                          : m
+                      )
+                    );
+                  } else if (!fullText) {
                     setMessages((prev) =>
                       prev.map((m) =>
                         m.id === assistantMessageId

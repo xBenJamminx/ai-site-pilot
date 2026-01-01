@@ -2,5 +2,5 @@
  * Tool system exports
  */
 
-export { defineTool, defineSimpleTool, createToolRegistry, ToolRegistry } from './registry';
+export { defineTool, defineSimpleTool, createToolRegistry, createFallbackMessageGenerator, ToolRegistry } from './registry';
 export type { ToolDefinition, ToolParameters, ToolParameterProperty, ToolExecution } from './types';

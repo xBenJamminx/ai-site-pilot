@@ -5,6 +5,40 @@
 import type { ToolDefinition, ToolParameters, ToolExecution } from './types';
 
 /**
+ * Helper to create a fallback message generator based on tool name mappings
+ *
+ * @example
+ * ```ts
+ * const generateFallback = createFallbackMessageGenerator({
+ *   filter_by_category: (args) => `Filtered to show **${args.category}** projects.`,
+ *   open_project: (args) => `Opened **${args.projectId}** for you to explore.`,
+ *   navigate: (args) => `Scrolled to the **${args.section}** section.`,
+ * });
+ * ```
+ */
+export function createFallbackMessageGenerator(
+  toolMessages: Record<string, (args: Record<string, unknown>) => string>,
+  defaultMessage = "I've made some changes. Take a look!"
+): (toolCalls: ToolExecution[]) => string {
+  return (toolCalls: ToolExecution[]) => {
+    if (toolCalls.length === 0) return defaultMessage;
+
+    const messages: string[] = [];
+
+    for (const tool of toolCalls) {
+      const generator = toolMessages[tool.name];
+      if (generator) {
+        messages.push(generator(tool.args));
+      } else {
+        messages.push(defaultMessage);
+      }
+    }
+
+    return messages.join(' ');
+  };
+}
+
+/**
  * Helper function to define a tool with type safety
  */
 export function defineTool<TParams extends Record<string, unknown>>(

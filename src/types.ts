@@ -80,6 +80,9 @@ export interface SitePilotProps {
   features?: SitePilotFeatures;
   /** Callback when a tool is called by the AI */
   onToolCall?: (toolName: string, args: Record<string, unknown>) => void | Promise<void>;
+  /** Generate a fallback message when AI uses tools but provides no text.
+   * Use createFallbackMessageGenerator() helper for easy setup. */
+  generateFallbackMessage?: (toolCalls: ToolExecution[]) => string;
   /** Initial open state */
   defaultOpen?: boolean;
   /** Placeholder text for input */

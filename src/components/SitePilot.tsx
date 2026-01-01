@@ -35,6 +35,7 @@ export function SitePilot({
   suggestions = [],
   features = {},
   onToolCall,
+  generateFallbackMessage,
   defaultOpen = false,
   placeholder = 'Type a message...',
   welcomeMessage = "Hi! I'm here to help you navigate and explore. What would you like to know?",
@@ -89,6 +90,7 @@ export function SitePilot({
     apiEndpoint,
     initialMessages,
     onToolCall,
+    generateFallbackMessage,
     onStreamStart: () => setShowSuggestions(false),
   });
 
