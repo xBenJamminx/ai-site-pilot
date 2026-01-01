@@ -8,7 +8,7 @@ A drop-in AI chat widget that can **control and navigate websites**. The AI can 
 
 **Key features:**
 - Works with any AI model via OpenRouter (Gemini, GPT-4, Claude, Llama)
-- Fast & affordable with Gemini 2.0 Flash default
+- Fast & affordable with Gemini 2.5 Flash-Lite default
 - Auto-generates system prompts from site content
 - Streaming responses with tool execution
 

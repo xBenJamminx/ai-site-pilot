@@ -101,7 +101,7 @@ function convertTools(tools: ToolDefinition[]): OpenRouterTool[] {
  * import { createHandler } from 'ai-site-pilot/api';
  *
  * export const POST = createHandler({
- *   model: 'google/gemini-2.0-flash',
+ *   model: 'google/gemini-2.5-flash-lite',
  *   systemPrompt: 'You are a helpful assistant...',
  *   tools: myTools,
  * });

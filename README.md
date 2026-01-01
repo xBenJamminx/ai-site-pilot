@@ -315,7 +315,7 @@ const generateFallback = createFallbackMessageGenerator({
 - React 18+ or React 19
 - Next.js 13+ (for API routes)
 - Tailwind CSS (for responsive styles)
-- OpenRouter API key (free at [openrouter.ai](https://openrouter.ai))
+- OpenRouter API key ([openrouter.ai](https://openrouter.ai))
 
 ## Troubleshooting
 
