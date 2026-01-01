@@ -5,6 +5,35 @@
 import type { ToolDefinition, ToolParameters, ToolExecution } from './types';
 
 /**
+ * Generate a smart message from tool name and args when no custom generator exists
+ */
+function generateSmartMessage(name: string, args: Record<string, unknown>): string {
+  const argValues = Object.values(args);
+  const primaryArg = argValues[0];
+  const argStr = primaryArg && typeof primaryArg === 'string' ? ` **${primaryArg}**` : '';
+
+  if (name.includes('navigate') || name.includes('scroll')) {
+    return `Navigated to${argStr}.`;
+  }
+  if (name.includes('filter')) {
+    return `Filtered by${argStr}.`;
+  }
+  if (name.includes('show') || name.includes('open') || name.includes('display')) {
+    return `Showing${argStr}.`;
+  }
+  if (name.includes('search')) {
+    return `Searched for${argStr}.`;
+  }
+  if (name.includes('select') || name.includes('highlight')) {
+    return `Selected${argStr}.`;
+  }
+
+  // Convert tool name to readable format
+  const readable = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  return argStr ? `${readable}:${argStr}.` : `${readable}.`;
+}
+
+/**
  * Helper to create a fallback message generator based on tool name mappings
  *
  * @example
@@ -17,11 +46,10 @@ import type { ToolDefinition, ToolParameters, ToolExecution } from './types';
  * ```
  */
 export function createFallbackMessageGenerator(
-  toolMessages: Record<string, (args: Record<string, unknown>) => string>,
-  defaultMessage = "I've made some changes. Take a look!"
+  toolMessages: Record<string, (args: Record<string, unknown>) => string>
 ): (toolCalls: ToolExecution[]) => string {
   return (toolCalls: ToolExecution[]) => {
-    if (toolCalls.length === 0) return defaultMessage;
+    if (toolCalls.length === 0) return '';
 
     const messages: string[] = [];
 
@@ -30,7 +58,8 @@ export function createFallbackMessageGenerator(
       if (generator) {
         messages.push(generator(tool.args));
       } else {
-        messages.push(defaultMessage);
+        // Use smart generation instead of generic message
+        messages.push(generateSmartMessage(tool.name, tool.args));
       }
     }
 

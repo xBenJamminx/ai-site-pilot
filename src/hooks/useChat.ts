@@ -3,6 +3,51 @@
 import { useState, useCallback, useRef } from 'react';
 import type { ChatMessage, ToolExecution, StreamEvent } from '../types';
 
+/**
+ * Generate a smart default fallback message based on tool names and args
+ * Converts tool names like "navigate_to_section" to "Navigated to [section]"
+ */
+function generateSmartFallback(toolCalls: ToolExecution[]): string {
+  if (toolCalls.length === 0) return '';
+
+  const messages = toolCalls.map(({ name, args }) => {
+    // Convert snake_case to readable format
+    const readableName = name
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+
+    // Extract the primary argument value for context
+    const argValues = Object.values(args);
+    const primaryArg = argValues[0];
+
+    if (primaryArg && typeof primaryArg === 'string') {
+      // Format common patterns
+      if (name.includes('navigate') || name.includes('scroll')) {
+        return `Navigated to **${primaryArg}**`;
+      }
+      if (name.includes('filter')) {
+        return `Filtered by **${primaryArg}**`;
+      }
+      if (name.includes('show') || name.includes('open') || name.includes('display')) {
+        return `Showing **${primaryArg}**`;
+      }
+      if (name.includes('search')) {
+        return `Searched for **${primaryArg}**`;
+      }
+      if (name.includes('select') || name.includes('highlight')) {
+        return `Selected **${primaryArg}**`;
+      }
+      // Generic with context
+      return `${readableName}: **${primaryArg}**`;
+    }
+
+    // No args or non-string arg
+    return readableName;
+  });
+
+  return messages.join('. ') + '.';
+}
+
 export interface UseChatOptions {
   /** API endpoint for chat */
   apiEndpoint: string;
@@ -168,8 +213,11 @@ export function useChat(options: UseChatOptions): UseChatReturn {
                   }
 
                   // If no text, generate contextual fallback based on tools used
-                  if (!fullText && toolCalls.length > 0 && generateFallbackMessage) {
-                    const fallbackMessage = generateFallbackMessage(toolCalls);
+                  if (!fullText && toolCalls.length > 0) {
+                    // Use custom fallback if provided, otherwise use smart default
+                    const fallbackMessage = generateFallbackMessage
+                      ? generateFallbackMessage(toolCalls)
+                      : generateSmartFallback(toolCalls);
                     setMessages((prev) =>
                       prev.map((m) =>
                         m.id === assistantMessageId
@@ -177,11 +225,12 @@ export function useChat(options: UseChatOptions): UseChatReturn {
                           : m
                       )
                     );
-                  } else if (!fullText) {
+                  } else if (!fullText && toolCalls.length === 0) {
+                    // No text AND no tools - this is an error state
                     setMessages((prev) =>
                       prev.map((m) =>
                         m.id === assistantMessageId
-                          ? { ...m, content: "I've made some changes. Take a look!" }
+                          ? { ...m, content: 'No response received. Please try again.' }
                           : m
                       )
                     );
