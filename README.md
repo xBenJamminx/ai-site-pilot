@@ -197,7 +197,7 @@ createHandler({
 
   // Optional
   apiKey: process.env.OPENROUTER_API_KEY,  // Uses env var by default
-  model: 'google/gemini-2.5-flash-lite',  // Default (free!)
+  model: 'google/gemini-2.5-flash-lite',
   tools: [myTool1, myTool2],
   temperature: 0.7,
   siteUrl: 'https://mysite.com',  // Shown in OpenRouter dashboard
