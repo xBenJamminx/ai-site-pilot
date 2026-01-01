@@ -1,6 +1,6 @@
 {
   "name": "ai-site-pilot",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "AI chat widget that can control and navigate your website. Full-stack solution with streaming, tool system, and polished UI.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
