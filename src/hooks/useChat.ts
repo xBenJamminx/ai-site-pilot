@@ -215,7 +215,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
         onStreamEnd?.();
       }
     },
-    [apiEndpoint, input, isLoading, messages, onToolCall, onStreamStart, onStreamEnd]
+    [apiEndpoint, input, isLoading, messages, onToolCall, onStreamStart, onStreamEnd, generateFallbackMessage]
   );
 
   return {
