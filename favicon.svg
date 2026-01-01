@@ -1,11 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Chat bubble base -->
-  <path d="M4 6C4 4.89543 4.89543 4 6 4H26C27.1046 4 28 4.89543 28 6V20C28 21.1046 27.1046 22 26 22H18L12 28V22H6C4.89543 22 4 21.1046 4 20V6Z" fill="#F59E0B"/>
-
-  <!-- Navigation arrow/cursor inside -->
-  <path d="M11 9L21 14L16 15L14 20L11 9Z" fill="white"/>
-
-  <!-- AI sparkle -->
-  <circle cx="22" cy="9" r="2" fill="white"/>
-  <path d="M22 6V7M22 11V12M19 9H20M24 9H25" stroke="white" stroke-width="1" stroke-linecap="round"/>
+  <!-- Cursor pointer with AI sparkles - represents AI-driven site navigation -->
+  <rect width="32" height="32" rx="8" fill="#F59E0B"/>
+  <path d="M9 7L9 23L14 18L19 25L22 24L17 17L23 17L9 7Z" fill="white"/>
+  <circle cx="25" cy="8" r="2" fill="white"/>
+  <circle cx="21" cy="5" r="1" fill="rgba(255,255,255,0.7)"/>
+  <circle cx="27" cy="11" r="1" fill="rgba(255,255,255,0.7)"/>
 </svg>
