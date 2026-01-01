@@ -8,7 +8,54 @@ import { useSpeech } from '../hooks/useSpeech';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { Suggestions } from './Suggestions';
-import type { SitePilotProps, ChatMessage as ChatMessageType } from '../types';
+import type { SitePilotProps, ChatMessage as ChatMessageType, AccentPreset } from '../types';
+
+// Accent color presets (HSL values)
+const ACCENT_PRESETS: Record<AccentPreset, { h: number; s: number; l: number }> = {
+  amber: { h: 38, s: 92, l: 50 },
+  pink: { h: 330, s: 100, l: 71 },
+  blue: { h: 210, s: 100, l: 50 },
+  green: { h: 142, s: 71, l: 45 },
+  purple: { h: 270, s: 100, l: 60 },
+  red: { h: 0, s: 84, l: 60 },
+  cyan: { h: 180, s: 100, l: 45 },
+  orange: { h: 25, s: 95, l: 53 },
+};
+
+// Convert hex color to HSL
+function hexToHSL(hex: string): { h: number; s: number; l: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return null;
+
+  let r = parseInt(result[1], 16) / 255;
+  let g = parseInt(result[2], 16) / 255;
+  let b = parseInt(result[3], 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
 
 /**
  * SitePilot - AI chat widget that can control and navigate your website
@@ -44,6 +91,7 @@ export function SitePilot({
   const {
     position = 'bottom-right',
     borderRadius = 24,
+    accent,
     accentColor,
     accentColorDark,
     backgroundColor,
@@ -53,6 +101,20 @@ export function SitePilot({
     userMessageBg,
     assistantMessageBg,
   } = theme;
+
+  // Resolve accent color to HSL values
+  const resolveAccentHSL = (): { h: number; s: number; l: number } | null => {
+    // Priority: accentColor (custom) > accent (preset)
+    if (accentColor) {
+      return hexToHSL(accentColor);
+    }
+    if (accent && ACCENT_PRESETS[accent]) {
+      return ACCENT_PRESETS[accent];
+    }
+    return null;
+  };
+
+  const accentHSL = resolveAccentHSL();
 
   const {
     speech = true,
@@ -158,7 +220,12 @@ export function SitePilot({
   // CSS custom properties for theming
   const cssVars = {
     '--pilot-radius': `${borderRadius}px`,
-    ...(accentColor && { '--pilot-accent': accentColor }),
+    // Set HSL components for accent color (this is what the CSS uses)
+    ...(accentHSL && {
+      '--pilot-accent-h': accentHSL.h,
+      '--pilot-accent-s': `${accentHSL.s}%`,
+      '--pilot-accent-l': `${accentHSL.l}%`,
+    }),
     ...(accentColorDark && { '--pilot-accent-dark': accentColorDark }),
     ...(backgroundColor && { '--pilot-bg': backgroundColor, '--pilot-bg-95': `${backgroundColor}f2` }),
     ...(textColor && { '--pilot-text': textColor }),

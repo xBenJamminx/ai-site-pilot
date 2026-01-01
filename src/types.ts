@@ -30,6 +30,9 @@ export interface Suggestion {
   icon?: string;
 }
 
+/** Preset accent color names */
+export type AccentPreset = 'amber' | 'pink' | 'blue' | 'green' | 'purple' | 'red' | 'cyan' | 'orange';
+
 // Theme configuration - all colors accept CSS color values (hex, rgb, hsl, etc.)
 export interface SitePilotTheme {
   /** Position of the chat panel */
@@ -37,8 +40,10 @@ export interface SitePilotTheme {
   /** Border radius in pixels */
   borderRadius?: number;
 
-  // Color customization - accepts any CSS color value
-  /** Primary accent color (buttons, highlights) - e.g., '#f59e0b' or 'rgb(245, 158, 11)' */
+  // Color customization
+  /** Simple preset accent color - e.g., 'pink', 'blue', 'amber' */
+  accent?: AccentPreset;
+  /** Custom accent color (hex, rgb, hsl) - e.g., '#f59e0b' or 'rgb(245, 158, 11)' */
   accentColor?: string;
   /** Secondary accent color for gradients - defaults to darker version of accentColor */
   accentColorDark?: string;

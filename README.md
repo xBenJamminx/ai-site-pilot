@@ -143,13 +143,30 @@ Main chat widget component.
   apiEndpoint="/api/chat"
   suggestions={[{ text: 'Help me', icon: '❓' }]}
   onToolCall={(name, args) => { /* handle tool calls */ }}
-  theme={{ accentColor: '#f59e0b' }}
+  theme={{ accent: 'pink' }}  // or accentColor: '#ec4899'
   features={{ speech: true, tts: true }}
   welcomeMessage="Hi! How can I help?"
   placeholder="Type a message..."
   defaultOpen={false}
 />
 ```
+
+### Theme Presets
+
+Use the `accent` prop for easy theming:
+
+| Preset | Color |
+|--------|-------|
+| `amber` | Default orange/amber |
+| `pink` | Hot pink |
+| `blue` | Primary blue |
+| `green` | Emerald green |
+| `purple` | Violet purple |
+| `red` | Coral red |
+| `cyan` | Teal cyan |
+| `orange` | Bright orange |
+
+Or use `accentColor` with any hex color: `accentColor: '#8b5cf6'`
 
 ### `defineTool()`
 
