@@ -5,57 +5,35 @@
 
 AI chat widget that can **control and navigate your website**. Unlike typical chatbots that just answer questions, Site Pilot can take actions—scroll to sections, open modals, filter content, and more.
 
+Works with any AI model (Gemini, GPT-4, Claude, Llama) via [OpenRouter](https://openrouter.ai).
+
 ## Features
 
 - 🎯 **Tool System** - Define custom actions the AI can take on your site
-- 🌊 **Streaming** - Real-time streaming responses with SSE
+- 🌊 **Streaming** - Real-time streaming responses
+- 🤖 **Any Model** - GPT-4, Claude, Gemini, Llama - just change one string
 - 🎤 **Speech** - Voice input and text-to-speech output
 - 🎨 **Themeable** - CSS variables for easy customization
 - 📱 **Responsive** - Works on all screen sizes
-- ⚡ **Vercel AI SDK** - Works with any LLM provider
-
-## How It Works
-
-The package provides the chat UI and streaming infrastructure. **You teach the AI about your specific site** through:
-
-1. **System Prompt** - Tell the AI what sections, data, and features exist on your site
-2. **Tool Definitions** - Define what actions the AI can take (filter, navigate, open modals)
-3. **Client Handlers** - Write the code that actually executes those actions
-
-```
-User: "Show me your mobile apps"
-         ↓
-   AI understands request
-         ↓
-   AI calls filter_by_category("Mobile") tool
-         ↓
-   Your handler receives the call
-         ↓
-   Your code filters the UI
-```
-
-The AI doesn't automatically know your site structure—you teach it via the system prompt. See the [complete example](#teaching-the-ai-your-site) below.
+- 🆓 **Free Tier** - Gemini 2.0 Flash is free on OpenRouter
 
 ## Installation
 
 ```bash
 npm install ai-site-pilot
-
-# Choose your backend (pick ONE):
-npm install @google/genai          # Gemini (recommended, no AI SDK needed)
-npm install ai @ai-sdk/google      # Vercel AI SDK with Gemini
-npm install ai @ai-sdk/openai      # Vercel AI SDK with OpenAI
 ```
 
 ## Quick Start
 
-### 1. Create the API Route
+### 1. Get an OpenRouter API Key
 
-**Option A: Gemini Direct (Recommended)** - No Vercel AI SDK needed!
+Sign up at [openrouter.ai](https://openrouter.ai) and get your API key.
+
+### 2. Create the API Route
 
 ```typescript
 // app/api/chat/route.ts
-import { createGeminiHandler } from 'ai-site-pilot/api';
+import { createHandler } from 'ai-site-pilot/api';
 import { defineTool } from 'ai-site-pilot/tools';
 
 const navigateTool = defineTool({
@@ -74,48 +52,15 @@ const navigateTool = defineTool({
   },
 });
 
-export const POST = createGeminiHandler({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-  model: 'gemini-2.0-flash',
+export const POST = createHandler({
+  model: 'google/gemini-2.0-flash-exp:free',  // Free! Or use any model
   systemPrompt: `You are a helpful assistant for our website.
 You can navigate users to different sections using the navigate tool.`,
   tools: [navigateTool],
 });
 ```
 
-**Option B: Vercel AI SDK** - Works with any AI SDK provider
-
-```typescript
-// app/api/chat/route.ts
-import { createChatHandler } from 'ai-site-pilot/api';
-import { defineTool } from 'ai-site-pilot/tools';
-import { google } from '@ai-sdk/google';
-
-const navigateTool = defineTool({
-  name: 'navigate',
-  description: 'Navigate to a section of the page',
-  parameters: {
-    type: 'object',
-    properties: {
-      section: {
-        type: 'string',
-        description: 'Section to navigate to',
-        enum: ['home', 'products', 'about', 'contact'],
-      },
-    },
-    required: ['section'],
-  },
-});
-
-export const POST = createChatHandler({
-  model: google('gemini-2.0-flash'),
-  systemPrompt: `You are a helpful assistant for our website.
-You can navigate users to different sections using the navigate tool.`,
-  tools: [navigateTool],
-});
-```
-
-### 2. Add the Component
+### 3. Add the Component
 
 ```tsx
 // app/layout.tsx or components/ChatWidget.tsx
@@ -144,88 +89,71 @@ export function ChatWidget() {
 }
 ```
 
+### 4. Add Environment Variable
+
+```bash
+# .env.local
+OPENROUTER_API_KEY=sk-or-...
+```
+
+That's it!
+
+## Available Models
+
+Change the `model` string to use any model:
+
+| Model | ID | Notes |
+|-------|-----|-------|
+| Gemini 2.0 Flash | `google/gemini-2.0-flash-exp:free` | **Free!** |
+| GPT-4o | `openai/gpt-4o` | Best overall |
+| Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
+| Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
+
+See all models at [openrouter.ai/models](https://openrouter.ai/models)
+
 ## API Reference
+
+### `createHandler()`
+
+Creates a Next.js API route handler.
+
+```typescript
+import { createHandler } from 'ai-site-pilot/api';
+
+export const POST = createHandler({
+  // Required
+  systemPrompt: 'You are a helpful assistant...',
+
+  // Optional
+  apiKey: process.env.OPENROUTER_API_KEY,  // Uses env var by default
+  model: 'google/gemini-2.0-flash-exp:free',  // Default
+  tools: [myTool1, myTool2],
+  temperature: 0.7,
+  siteUrl: 'https://mysite.com',  // Shown in OpenRouter dashboard
+  siteName: 'My Site',
+});
+```
 
 ### `<SitePilot />`
 
 Main chat widget component.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `apiEndpoint` | `string` | required | API endpoint for chat |
-| `theme` | `SitePilotTheme` | `{}` | Theme configuration |
-| `suggestions` | `Suggestion[]` | `[]` | Suggestion prompts |
-| `features` | `SitePilotFeatures` | `{}` | Feature toggles |
-| `onToolCall` | `(name, args) => void` | - | Tool call handler |
-| `defaultOpen` | `boolean` | `false` | Initial open state |
-| `placeholder` | `string` | `'Type a message...'` | Input placeholder |
-| `welcomeMessage` | `string` | `'Hi! I'm here to help...'` | Welcome message |
-
-#### Theme Options
-
-```typescript
-interface SitePilotTheme {
-  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-  borderRadius?: number;
-
-  // Colors - all accept CSS color values (hex, rgb, hsl)
-  accentColor?: string;         // Primary accent '#f59e0b'
-  accentColorDark?: string;     // Gradient end '#d97706'
-  backgroundColor?: string;      // Panel background '#0F0720'
-  textColor?: string;           // Primary text '#ffffff'
-  textMutedColor?: string;      // Secondary text '#a1a1aa'
-  borderColor?: string;         // Border 'rgba(255,255,255,0.1)'
-  userMessageBg?: string;       // User message bubble
-  assistantMessageBg?: string;  // Assistant message bubble
-}
-```
-
-#### Feature Toggles
-
-```typescript
-interface SitePilotFeatures {
-  speech?: boolean;      // Voice input (default: true)
-  tts?: boolean;         // Text-to-speech (default: true)
-  fullscreen?: boolean;  // Fullscreen mode (default: true)
-  suggestions?: boolean; // Show suggestions (default: true)
-}
-```
-
-### `createGeminiHandler()`
-
-Factory for creating Next.js API route handlers using Gemini directly (no AI SDK needed).
-
-```typescript
-import { createGeminiHandler } from 'ai-site-pilot/api';
-
-export const POST = createGeminiHandler({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,  // Optional, uses env var by default
-  model: 'gemini-2.0-flash',                          // Default: gemini-2.0-flash
-  systemPrompt: 'You are a helpful assistant...',
-  tools: [myTool1, myTool2],
-  temperature: 0.7,
-});
-```
-
-### `createChatHandler()`
-
-Factory for creating Next.js API route handlers using Vercel AI SDK.
-
-```typescript
-import { createChatHandler } from 'ai-site-pilot/api';
-
-export const POST = createChatHandler({
-  model: google('gemini-2.0-flash'),  // Any Vercel AI SDK model
-  systemPrompt: 'You are a helpful assistant...',
-  tools: [myTool1, myTool2],
-  temperature: 0.7,
-  maxTokens: 1000,
-});
+```tsx
+<SitePilot
+  apiEndpoint="/api/chat"
+  suggestions={[{ text: 'Help me', icon: '❓' }]}
+  onToolCall={(name, args) => { /* handle tool calls */ }}
+  theme={{ accentColor: '#f59e0b' }}
+  features={{ speech: true, tts: true }}
+  welcomeMessage="Hi! How can I help?"
+  placeholder="Type a message..."
+  defaultOpen={false}
+/>
 ```
 
 ### `defineTool()`
 
-Helper for defining tools with type safety.
+Helper for defining tools.
 
 ```typescript
 import { defineTool } from 'ai-site-pilot/tools';
@@ -241,166 +169,21 @@ const searchTool = defineTool({
     },
     required: ['query'],
   },
-  handler: async ({ query, category }) => {
-    // Client-side handler (optional)
-    const results = await searchProducts(query, category);
-    displayResults(results);
-  },
 });
-```
-
-### `useChat()`
-
-Hook for custom chat implementations.
-
-```typescript
-import { useChat } from 'ai-site-pilot/hooks';
-
-function MyCustomChat() {
-  const {
-    messages,
-    input,
-    setInput,
-    isLoading,
-    sendMessage,
-    clearMessages,
-  } = useChat({
-    apiEndpoint: '/api/chat',
-    onToolCall: (name, args) => {
-      // Handle tool calls
-    },
-  });
-
-  return (
-    // Your custom UI
-  );
-}
-```
-
-## Styling
-
-### CSS Variables
-
-Override these variables to customize the appearance:
-
-```css
-.pilot-container {
-  --pilot-accent-h: 38;       /* Hue */
-  --pilot-accent-s: 92%;      /* Saturation */
-  --pilot-accent-l: 50%;      /* Lightness */
-  --pilot-bg: #0F0720;        /* Background */
-  --pilot-text: #ffffff;       /* Text color */
-  --pilot-text-muted: #a1a1aa; /* Muted text */
-  --pilot-border: rgba(255, 255, 255, 0.1);
-  --pilot-radius: 24px;
-}
-```
-
-### Tailwind Integration
-
-If using Tailwind, you can extend your config:
-
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        pilot: {
-          accent: 'hsl(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l))',
-        },
-      },
-    },
-  },
-};
-```
-
-## Use Cases
-
-### E-commerce
-
-```typescript
-const tools = [
-  defineTool({
-    name: 'search_products',
-    description: 'Search product catalog',
-    parameters: { /* ... */ },
-  }),
-  defineTool({
-    name: 'add_to_cart',
-    description: 'Add item to shopping cart',
-    parameters: { /* ... */ },
-  }),
-  defineTool({
-    name: 'show_category',
-    description: 'Filter products by category',
-    parameters: { /* ... */ },
-  }),
-];
-```
-
-### Documentation Sites
-
-```typescript
-const tools = [
-  defineTool({
-    name: 'search_docs',
-    description: 'Search documentation',
-    parameters: { /* ... */ },
-  }),
-  defineTool({
-    name: 'navigate_to_page',
-    description: 'Go to a documentation page',
-    parameters: { /* ... */ },
-  }),
-];
-```
-
-### Portfolio Sites
-
-```typescript
-const tools = [
-  defineTool({
-    name: 'open_project',
-    description: 'Open project details modal',
-    parameters: { /* ... */ },
-  }),
-  defineTool({
-    name: 'filter_by_category',
-    description: 'Filter projects by category',
-    parameters: { /* ... */ },
-  }),
-];
 ```
 
 ## Custom API Implementation
 
-If you need to implement your own API route (e.g., using a different AI provider), the widget expects Server-Sent Events (SSE) in this format:
-
-### SSE Streaming Format
+If you need to use a different AI provider, implement this SSE format:
 
 ```
 data: {"type":"text","content":"Hello, "}
-
 data: {"type":"text","content":"how can I help?"}
-
 data: {"type":"tool","name":"navigate","args":{"section":"products"}}
-
 data: {"type":"done"}
 ```
 
-#### Event Types
-
-| Type | Description | Example |
-|------|-------------|---------|
-| `text` | Streaming text chunk | `{"type":"text","content":"Hello"}` |
-| `tool` | Tool/function call | `{"type":"tool","name":"navigate","args":{"section":"home"}}` |
-| `done` | Stream complete | `{"type":"done"}` |
-| `error` | Error occurred | `{"type":"error","message":"Something went wrong"}` |
-
-### SSE Utilities
-
-Use the built-in SSE helpers for custom implementations:
+Use the built-in SSE helpers:
 
 ```typescript
 import { createSSEEncoder, getSSEHeaders } from 'ai-site-pilot/api';
@@ -410,13 +193,8 @@ export async function POST(req: Request) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      // Stream text
       controller.enqueue(sse.encodeText('Hello!'));
-
-      // Send tool call
       controller.enqueue(sse.encodeTool('navigate', { section: 'products' }));
-
-      // Done
       controller.enqueue(sse.encodeDone());
       controller.close();
     },
@@ -428,15 +206,14 @@ export async function POST(req: Request) {
 
 ## Handling Tool-Only Responses
 
-When the AI calls tools without providing text, you can customize the fallback message:
+When the AI calls tools without text, customize the fallback:
 
 ```typescript
 import { SitePilot, createFallbackMessageGenerator } from 'ai-site-pilot';
 
 const generateFallback = createFallbackMessageGenerator({
-  navigate: (args) => `Scrolled to **${args.section}** section.`,
-  filter_products: (args) => `Showing **${args.category}** products.`,
-  search: (args) => `Found results for "${args.query}".`,
+  navigate: (args) => `Scrolled to **${args.section}**.`,
+  filter: (args) => `Showing **${args.category}** items.`,
 });
 
 <SitePilot
@@ -449,9 +226,7 @@ const generateFallback = createFallbackMessageGenerator({
 
 - React 18+ or React 19
 - Next.js 13+ (for API routes)
-- One of:
-  - `@google/genai` (Gemini direct - recommended)
-  - `ai` + provider package (Vercel AI SDK)
+- OpenRouter API key (free at [openrouter.ai](https://openrouter.ai))
 
 ## License
 

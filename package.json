@@ -1,7 +1,7 @@
 {
   "name": "ai-site-pilot",
-  "version": "0.3.0",
-  "description": "AI chat widget that can control and navigate your website. Full-stack solution with streaming, tool system, and polished UI.",
+  "version": "0.4.0",
+  "description": "AI chat widget that can control and navigate your website. Works with any AI model via OpenRouter.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -44,10 +44,10 @@
     "chat",
     "chatbot",
     "site-pilot",
+    "openrouter",
     "navigation",
     "react",
     "nextjs",
-    "vercel-ai-sdk",
     "streaming",
     "tools",
     "function-calling"
@@ -68,17 +68,7 @@
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "ai": "^4.0.0 || ^5.0.0",
-    "@google/genai": ">=1.0.0"
-  },
-  "peerDependenciesMeta": {
-    "ai": {
-      "optional": true
-    },
-    "@google/genai": {
-      "optional": true
-    }
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "framer-motion": "^11.0.0",
@@ -86,11 +76,9 @@
     "react-markdown": "^9.0.0"
   },
   "devDependencies": {
-    "@google/genai": "^1.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "ai": "^4.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
   }

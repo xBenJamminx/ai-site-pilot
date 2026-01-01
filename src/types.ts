@@ -93,19 +93,6 @@ export interface SitePilotProps {
   className?: string;
 }
 
-// API handler configuration
-export interface ChatHandlerConfig {
-  /** The AI model to use (from Vercel AI SDK) */
-  model: Parameters<typeof import('ai').streamText>[0]['model'];
-  /** System prompt for the AI */
-  systemPrompt: string;
-  /** Tool definitions for the AI */
-  tools?: ToolDefinition[];
-  /** Temperature for response generation (0-1) */
-  temperature?: number;
-  /** Maximum tokens in response */
-  maxTokens?: number;
-}
 
 // Tool definition for the registry
 export interface ToolDefinition<TParams extends Record<string, unknown> = Record<string, unknown>> {

@@ -2,13 +2,9 @@
  * API exports
  */
 
-// Vercel AI SDK handler (requires 'ai' package)
-export { createChatHandler } from './createChatHandler';
-export type { ChatHandlerConfig } from './createChatHandler';
-
-// Gemini direct handler (requires '@google/genai' package - no AI SDK needed!)
-export { createGeminiHandler } from './createGeminiHandler';
-export type { GeminiHandlerConfig } from './createGeminiHandler';
+// Main handler using OpenRouter (works with any model)
+export { createHandler } from './createHandler';
+export type { HandlerConfig } from './createHandler';
 
 // SSE utilities for custom implementations
 export { createSSEEncoder, getSSEHeaders, parseSSEStream } from './streaming';
