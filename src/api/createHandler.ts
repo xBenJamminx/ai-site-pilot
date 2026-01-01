@@ -168,6 +168,10 @@ export function createHandler(config: HandlerConfig) {
             const decoder = new TextDecoder();
             let buffer = '';
 
+            // Accumulate tool calls across stream chunks
+            // OpenRouter streams tool calls in pieces: name first, then arguments in chunks
+            const pendingToolCalls: Map<number, { name: string; arguments: string }> = new Map();
+
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
@@ -190,22 +194,44 @@ export function createHandler(config: HandlerConfig) {
                       controller.enqueue(sse.encodeText(delta.content));
                     }
 
-                    // Handle tool calls
+                    // Handle tool calls - accumulate across chunks
                     if (delta?.tool_calls) {
                       for (const toolCall of delta.tool_calls) {
-                        if (toolCall.function?.name && toolCall.function?.arguments) {
-                          try {
-                            const args = JSON.parse(toolCall.function.arguments);
-                            controller.enqueue(sse.encodeTool(toolCall.function.name, args));
-                          } catch {
-                            // Arguments might be streamed in chunks, skip incomplete
-                          }
+                        const index = toolCall.index ?? 0;
+
+                        // Get or create pending tool call
+                        let pending = pendingToolCalls.get(index);
+                        if (!pending) {
+                          pending = { name: '', arguments: '' };
+                          pendingToolCalls.set(index, pending);
+                        }
+
+                        // Accumulate name (usually comes in first chunk)
+                        if (toolCall.function?.name) {
+                          pending.name = toolCall.function.name;
+                        }
+
+                        // Accumulate arguments (streamed in chunks)
+                        if (toolCall.function?.arguments) {
+                          pending.arguments += toolCall.function.arguments;
                         }
                       }
                     }
                   } catch {
                     // Skip malformed JSON
                   }
+                }
+              }
+            }
+
+            // Emit all accumulated tool calls now that streaming is complete
+            for (const [, toolCall] of pendingToolCalls) {
+              if (toolCall.name && toolCall.arguments) {
+                try {
+                  const args = JSON.parse(toolCall.arguments);
+                  controller.enqueue(sse.encodeTool(toolCall.name, args));
+                } catch (e) {
+                  console.error('Failed to parse tool arguments:', toolCall.arguments, e);
                 }
               }
             }
