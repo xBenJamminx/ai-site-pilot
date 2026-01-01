@@ -146,18 +146,61 @@ See all models at [openrouter.ai/models](https://openrouter.ai/models)
 
 ### `createHandler()`
 
-Creates a Next.js API route handler.
+Creates a Next.js API route handler. You can use either `systemPrompt` (manual) or `siteContent` (auto-generated).
+
+**Option 1: Auto-generated prompt with `siteContent`** (Recommended)
 
 ```typescript
 import { createHandler } from 'ai-site-pilot/api';
 
 export const POST = createHandler({
-  // Required
-  systemPrompt: 'You are a helpful assistant...',
+  model: 'google/gemini-2.0-flash-exp:free',
+  siteContent: {
+    name: 'Acme Dance Studio',
+    type: 'dance studio',
+    description: 'Premier dance education since 1995',
+    personality: 'warm and encouraging',
+    pages: ['home', 'classes', 'teachers', 'schedule', 'contact'],
+    items: [
+      { id: 'ballet', name: 'Ballet', category: 'class', description: 'Classical ballet for ages 3-adult', price: '$80/month' },
+      { id: 'jazz', name: 'Jazz', category: 'class', description: 'High-energy jazz for ages 6+', price: '$75/month' },
+      { id: 'sarah', name: 'Sarah Johnson', category: 'teacher', description: 'Owner & lead instructor, 15 years experience' },
+    ],
+    faqs: [
+      { question: 'What should I wear?', answer: 'Leotard and ballet slippers for ballet, comfortable athletic wear for jazz.' },
+    ],
+    contact: {
+      email: 'info@acmedance.com',
+      phone: '555-1234',
+      hours: 'Mon-Sat 9am-8pm',
+    },
+  },
+  tools: [navigateTool, showClassTool],
+});
+```
+
+The AI automatically knows about your content and can answer questions like "What classes do you offer?" with specific details.
+
+**Option 2: Manual `systemPrompt`**
+
+```typescript
+export const POST = createHandler({
+  systemPrompt: 'You are a helpful assistant for Acme Dance Studio...',
+  tools: [navigateTool],
+});
+```
+
+**Full options:**
+
+```typescript
+createHandler({
+  // Content (use ONE of these)
+  siteContent: { ... },        // Auto-generate prompt from your content
+  systemPrompt: '...',         // Or write your own prompt
 
   // Optional
   apiKey: process.env.OPENROUTER_API_KEY,  // Uses env var by default
-  model: 'google/gemini-2.0-flash-exp:free',  // Default
+  model: 'google/gemini-2.0-flash-exp:free',  // Default (free!)
   tools: [myTool1, myTool2],
   temperature: 0.7,
   siteUrl: 'https://mysite.com',  // Shown in OpenRouter dashboard

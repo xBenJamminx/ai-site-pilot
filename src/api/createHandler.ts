@@ -6,14 +6,13 @@
 
 import type { ToolDefinition } from '../tools/types';
 import { createSSEEncoder, getSSEHeaders } from './streaming';
+import { generateSystemPrompt, type SiteContent } from './generateSystemPrompt';
 
-export interface HandlerConfig {
+interface BaseHandlerConfig {
   /** OpenRouter API key (or set OPENROUTER_API_KEY env var) */
   apiKey?: string;
   /** Model to use (e.g., 'google/gemini-2.0-flash-exp:free', 'openai/gpt-4o', 'anthropic/claude-3.5-sonnet') */
   model?: string;
-  /** System prompt for the AI */
-  systemPrompt: string;
   /** Tool definitions for the AI */
   tools?: ToolDefinition[];
   /** Temperature for response generation (0-1) */
@@ -23,6 +22,20 @@ export interface HandlerConfig {
   /** Your app name (shown in OpenRouter dashboard) */
   siteName?: string;
 }
+
+interface HandlerConfigWithPrompt extends BaseHandlerConfig {
+  /** System prompt for the AI (use this OR siteContent, not both) */
+  systemPrompt: string;
+  siteContent?: never;
+}
+
+interface HandlerConfigWithContent extends BaseHandlerConfig {
+  /** Site content to auto-generate system prompt (use this OR systemPrompt, not both) */
+  siteContent: SiteContent;
+  systemPrompt?: never;
+}
+
+export type HandlerConfig = HandlerConfigWithPrompt | HandlerConfigWithContent;
 
 interface RequestBody {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
@@ -98,12 +111,16 @@ export function createHandler(config: HandlerConfig) {
   const {
     apiKey = process.env.OPENROUTER_API_KEY,
     model = 'google/gemini-2.0-flash-exp:free',
-    systemPrompt,
     tools = [],
     temperature = 0.7,
     siteUrl,
     siteName,
   } = config;
+
+  // Generate system prompt from siteContent or use provided systemPrompt
+  const systemPrompt = 'siteContent' in config && config.siteContent
+    ? generateSystemPrompt(config.siteContent)
+    : (config as HandlerConfigWithPrompt).systemPrompt;
 
   return async function POST(req: Request): Promise<Response> {
     if (!apiKey) {
