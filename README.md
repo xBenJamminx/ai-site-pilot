@@ -23,6 +23,35 @@ Works with any AI model (Gemini, GPT-4, Claude, Llama) via [OpenRouter](https://
 npm install ai-site-pilot
 ```
 
+## Setup
+
+### Tailwind CSS Configuration (Required)
+
+If you're using Tailwind CSS, add ai-site-pilot to your content config so Tailwind generates the necessary classes:
+
+```js
+// tailwind.config.js or tailwind.config.ts
+module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    // Add this line:
+    './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',
+  ],
+  // ...
+}
+```
+
+**Without this, the button text ("Ask AI") and other responsive styles won't work correctly.**
+
+### Import Styles
+
+Make sure to import the CSS file in your component:
+
+```tsx
+import 'ai-site-pilot/styles.css';
+```
+
 ## Quick Start
 
 ### 1. Get an OpenRouter API Key
@@ -245,7 +274,64 @@ const generateFallback = createFallbackMessageGenerator({
 
 - React 18+ or React 19
 - Next.js 13+ (for API routes)
+- Tailwind CSS (for responsive styles)
 - OpenRouter API key (free at [openrouter.ai](https://openrouter.ai))
+
+## Troubleshooting
+
+### Button only shows icon, no "Ask AI" text
+
+Your Tailwind config isn't scanning the package. Add this to your `tailwind.config.js`:
+
+```js
+content: [
+  // ... your paths
+  './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',
+]
+```
+
+### Theme accent color not working
+
+Make sure you're using the `accent` prop (preset) or `accentColor` prop (custom hex):
+
+```tsx
+// Using preset
+<SitePilot theme={{ accent: 'pink' }} />
+
+// Using custom color
+<SitePilot theme={{ accentColor: '#ec4899' }} />
+```
+
+Don't set CSS variables directly—use the component props.
+
+### Tools not executing
+
+1. Make sure you're handling tool calls in `onToolCall`:
+```tsx
+<SitePilot
+  onToolCall={(name, args) => {
+    console.log('Tool called:', name, args);
+    // Handle the tool...
+  }}
+/>
+```
+
+2. Check browser console for errors
+
+### "I've made some changes" generic message
+
+Use `generateFallbackMessage` to customize messages when the AI uses tools without text:
+
+```tsx
+import { createFallbackMessageGenerator } from 'ai-site-pilot';
+
+const generateFallback = createFallbackMessageGenerator({
+  navigate: (args) => `Navigated to ${args.section}`,
+  filter: (args) => `Filtered by ${args.category}`,
+});
+
+<SitePilot generateFallbackMessage={generateFallback} />
+```
 
 ## License
 
