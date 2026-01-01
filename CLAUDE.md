@@ -46,6 +46,20 @@ export const SITE_INFO = {
 // app/api/chat/route.ts - Imports from the SAME source
 import { CLASSES, TEACHERS, SITE_INFO } from '@/lib/data';
 import { createHandler } from 'ai-site-pilot/api';
+import { defineTool } from 'ai-site-pilot/tools';
+
+// Define tools (plain objects work too, defineTool just adds type safety)
+const navigateTool = defineTool({
+  name: 'navigate_to_section',
+  description: 'Navigate to a section of the page',
+  parameters: {
+    type: 'object',
+    properties: {
+      section: { type: 'string', enum: ['home', 'classes', 'teachers', 'contact'] },
+    },
+    required: ['section'],
+  },
+});
 
 export const POST = createHandler({
   siteContent: {
@@ -59,7 +73,7 @@ export const POST = createHandler({
       phone: SITE_INFO.phone,
     },
   },
-  tools,
+  tools: [navigateTool],
 });
 ```
 
