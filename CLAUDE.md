@@ -8,7 +8,7 @@ A drop-in AI chat widget that can **control and navigate websites**. The AI can 
 
 **Key features:**
 - Works with any AI model via OpenRouter (Gemini, GPT-4, Claude, Llama)
-- Free tier available (Gemini 2.0 Flash)
+- Fast & affordable with Gemini 2.0 Flash default
 - Auto-generates system prompts from site content
 - Streaming responses with tool execution
 
@@ -217,7 +217,7 @@ const showServiceTool = defineTool({
 
 // Create handler with site content - prompt is auto-generated!
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash-exp:free',  // Free!
+  model: 'google/gemini-2.0-flash',
   siteContent: {
     name: 'Acme Dance Studio',
     type: 'dance studio',
@@ -302,7 +302,7 @@ export function ChatWidget() {
 OPENROUTER_API_KEY=sk-or-...
 ```
 
-Get a free key at [openrouter.ai](https://openrouter.ai) - Gemini 2.0 Flash is free!
+Get your API key at [openrouter.ai](https://openrouter.ai) and add credits to your account.
 
 ## Alternative: Manual System Prompt
 
@@ -310,7 +310,7 @@ If you need full control, use `systemPrompt` instead of `siteContent`:
 
 ```typescript
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash-exp:free',
+  model: 'google/gemini-2.0-flash',
   systemPrompt: `You are an assistant for Acme Dance Studio.
 
 ## Classes
@@ -512,7 +512,7 @@ Use `siteContent` to provide actual data about your site. The AI only knows what
 
 | Model | ID | Notes |
 |-------|-----|-------|
-| Gemini 2.0 Flash | `google/gemini-2.0-flash-exp:free` | **Free!** Default |
+| Gemini 2.0 Flash | `google/gemini-2.0-flash` | Fast, affordable (default) |
 | GPT-4o | `openai/gpt-4o` | Best overall |
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |

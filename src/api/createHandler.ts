@@ -11,7 +11,7 @@ import { generateSystemPrompt, type SiteContent } from './generateSystemPrompt';
 interface BaseHandlerConfig {
   /** OpenRouter API key (or set OPENROUTER_API_KEY env var) */
   apiKey?: string;
-  /** Model to use (e.g., 'google/gemini-2.0-flash-exp:free', 'openai/gpt-4o', 'anthropic/claude-3.5-sonnet') */
+  /** Model to use (e.g., 'google/gemini-2.0-flash', 'openai/gpt-4o', 'anthropic/claude-3.5-sonnet') */
   model?: string;
   /** Tool definitions for the AI */
   tools?: ToolDefinition[];
@@ -90,7 +90,7 @@ function convertTools(tools: ToolDefinition[]): OpenRouterTool[] {
  * Create a Next.js API route handler using OpenRouter
  *
  * Works with any model - just change the model string:
- * - 'google/gemini-2.0-flash-exp:free' (free!)
+ * - 'google/gemini-2.0-flash'
  * - 'openai/gpt-4o'
  * - 'anthropic/claude-3.5-sonnet'
  * - 'meta-llama/llama-3.1-70b-instruct'
@@ -101,7 +101,7 @@ function convertTools(tools: ToolDefinition[]): OpenRouterTool[] {
  * import { createHandler } from 'ai-site-pilot/api';
  *
  * export const POST = createHandler({
- *   model: 'google/gemini-2.0-flash-exp:free',
+ *   model: 'google/gemini-2.0-flash',
  *   systemPrompt: 'You are a helpful assistant...',
  *   tools: myTools,
  * });
@@ -110,7 +110,7 @@ function convertTools(tools: ToolDefinition[]): OpenRouterTool[] {
 export function createHandler(config: HandlerConfig) {
   const {
     apiKey = process.env.OPENROUTER_API_KEY,
-    model = 'google/gemini-2.0-flash-exp:free',
+    model = 'google/gemini-2.0-flash',
     tools = [],
     temperature = 0.7,
     siteUrl,

@@ -15,7 +15,6 @@ Works with any AI model (Gemini, GPT-4, Claude, Llama) via [OpenRouter](https://
 - 🎤 **Speech** - Voice input and text-to-speech output
 - 🎨 **Themeable** - CSS variables for easy customization
 - 📱 **Responsive** - Works on all screen sizes
-- 🆓 **Free Tier** - Gemini 2.0 Flash is free on OpenRouter
 
 ## Installation
 
@@ -56,9 +55,7 @@ import 'ai-site-pilot/styles.css';
 
 ### 1. Get an OpenRouter API Key
 
-Sign up at [openrouter.ai](https://openrouter.ai) and get your API key.
-
-> **💡 Free tier:** Gemini 2.0 Flash (`google/gemini-2.0-flash-exp:free`) is completely free on OpenRouter—no credit card required. Perfect for getting started!
+Sign up at [openrouter.ai](https://openrouter.ai) and get your API key. Add credits to your account for API usage.
 
 ### 2. Create the API Route
 
@@ -84,7 +81,7 @@ const navigateTool = defineTool({
 });
 
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash-exp:free',  // Free! Or use any model
+  model: 'google/gemini-2.0-flash',  // Or use any OpenRouter model
   systemPrompt: `You are a helpful assistant for our website.
 You can navigate users to different sections using the navigate tool.`,
   tools: [navigateTool],
@@ -135,7 +132,7 @@ Change the `model` string to use any model:
 
 | Model | ID | Notes |
 |-------|-----|-------|
-| Gemini 2.0 Flash | `google/gemini-2.0-flash-exp:free` | **Free!** |
+| Gemini 2.0 Flash | `google/gemini-2.0-flash` | Fast, affordable (default) |
 | GPT-4o | `openai/gpt-4o` | Best overall |
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
@@ -154,7 +151,7 @@ Creates a Next.js API route handler. You can use either `systemPrompt` (manual) 
 import { createHandler } from 'ai-site-pilot/api';
 
 export const POST = createHandler({
-  model: 'google/gemini-2.0-flash-exp:free',
+  model: 'google/gemini-2.0-flash',
   siteContent: {
     name: 'Acme Dance Studio',
     type: 'dance studio',
@@ -200,7 +197,7 @@ createHandler({
 
   // Optional
   apiKey: process.env.OPENROUTER_API_KEY,  // Uses env var by default
-  model: 'google/gemini-2.0-flash-exp:free',  // Default (free!)
+  model: 'google/gemini-2.0-flash',  // Default (free!)
   tools: [myTool1, myTool2],
   temperature: 0.7,
   siteUrl: 'https://mysite.com',  // Shown in OpenRouter dashboard
