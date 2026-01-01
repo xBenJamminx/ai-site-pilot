@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Gradient background circle -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F59E0B"/>
+      <stop offset="100%" style="stop-color:#EA580C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square base -->
+  <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#grad)"/>
+
+  <!-- Stylized compass/navigation with chat elements -->
+  <circle cx="16" cy="14" r="8" fill="none" stroke="white" stroke-width="2"/>
+  <path d="M16 8L18 14L16 12L14 14L16 8Z" fill="white"/>
+  <path d="M16 20L14 14L16 16L18 14L16 20Z" fill="rgba(255,255,255,0.6)"/>
+
+  <!-- Chat tail -->
+  <path d="M10 22L16 22L12 28Z" fill="url(#grad)"/>
+</svg>

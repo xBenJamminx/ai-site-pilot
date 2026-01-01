@@ -26,18 +26,24 @@ npm install ai-site-pilot
 
 ### Tailwind CSS Configuration (Required)
 
-If you're using Tailwind CSS, add ai-site-pilot to your content config so Tailwind generates the necessary classes:
+Add ai-site-pilot to your Tailwind content config so classes are generated:
 
+**Tailwind v4** (CSS-based config):
+```css
+/* In your main CSS file */
+@import "tailwindcss";
+@source "../../node_modules/ai-site-pilot/dist/**/*.{js,mjs}";
+```
+
+**Tailwind v3** (JS config):
 ```js
-// tailwind.config.js or tailwind.config.ts
+// tailwind.config.js
 module.exports = {
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
-    // Add this line:
     './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',
   ],
-  // ...
 }
 ```
 
@@ -321,13 +327,16 @@ const generateFallback = createFallbackMessageGenerator({
 
 ### Button only shows icon, no "Ask AI" text
 
-Your Tailwind config isn't scanning the package. Add this to your `tailwind.config.js`:
+Your Tailwind config isn't scanning the package.
 
+**Tailwind v4**: Add to your CSS:
+```css
+@source "../../node_modules/ai-site-pilot/dist/**/*.{js,mjs}";
+```
+
+**Tailwind v3**: Add to `tailwind.config.js`:
 ```js
-content: [
-  // ... your paths
-  './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',
-]
+content: ['./node_modules/ai-site-pilot/dist/**/*.{js,mjs}']
 ```
 
 ### Theme accent color not working

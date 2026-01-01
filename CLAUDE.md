@@ -152,6 +152,32 @@ const navigateTool = defineTool({
 3. **Stale navigation enums** - If you add a new page, update the tool enum
 4. **Duplicated data** - Always import from shared source, never copy values
 
+### Making Tools Execute Reliably
+
+By default, AI models may describe where content is instead of using tools to navigate there. Add explicit instructions to make tools execute:
+
+```typescript
+siteContent: {
+  // ... your content
+  additionalContext: `
+IMPORTANT - Tool Usage:
+- When users ask about classes, ALWAYS use navigate_to_section to show them, then explain.
+- When users ask about teachers, ALWAYS navigate to the team section.
+- DO NOT just describe where to find things - USE THE TOOLS to take users there directly.
+- Be proactive: if discussing a topic, navigate to show it.
+  `.trim(),
+}
+
+// Or with manual systemPrompt:
+systemPrompt: `...
+## CRITICAL: Tool Usage
+You MUST use tools proactively. When discussing any topic:
+1. First, use the relevant tool to navigate/show/filter
+2. Then, provide your explanation
+Never just describe where something is - take the user there!
+...`
+```
+
 ## Quick Setup (Recommended)
 
 ### 1. Install
@@ -162,14 +188,20 @@ npm install ai-site-pilot
 
 ### 2. Configure Tailwind (Required)
 
-Add to `tailwind.config.js`:
+**Tailwind v4** (CSS-based):
+```css
+@import "tailwindcss";
+@source "../../node_modules/ai-site-pilot/dist/**/*.{js,mjs}";
+```
 
+**Tailwind v3** (JS config):
 ```js
+// tailwind.config.js
 module.exports = {
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
-    './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',  // Required!
+    './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',
   ],
 }
 ```
@@ -486,7 +518,14 @@ siteContent: {
 ## Troubleshooting
 
 ### Button only shows icon, no "Ask AI" text
-Your Tailwind config isn't scanning the package:
+Your Tailwind config isn't scanning the package.
+
+**Tailwind v4**: Add to your CSS:
+```css
+@source "../../node_modules/ai-site-pilot/dist/**/*.{js,mjs}";
+```
+
+**Tailwind v3**: Add to `tailwind.config.js`:
 ```js
 content: ['./node_modules/ai-site-pilot/dist/**/*.{js,mjs}']
 ```
