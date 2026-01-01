@@ -13,6 +13,12 @@
  */
 
 .pilot-container {
+  /* Container should not interfere with fixed children */
+  position: relative;
+  z-index: 199;
+  pointer-events: none;
+
+  /* CSS custom properties for theming */
   --pilot-bg: #0F0720;
   --pilot-bg-95: rgba(15, 7, 32, 0.95);
   --pilot-text: #ffffff;
@@ -29,6 +35,11 @@
   --pilot-accent-dark: hsl(var(--pilot-accent-h), var(--pilot-accent-s), 40%);
   --pilot-accent-glow: hsla(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l), 0.2);
   --pilot-accent-glow-strong: hsla(var(--pilot-accent-h), var(--pilot-accent-s), var(--pilot-accent-l), 0.3);
+}
+
+/* Fixed children need pointer events enabled */
+.pilot-container > * {
+  pointer-events: auto;
 }
 
 /* Panel */

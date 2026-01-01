@@ -40,11 +40,50 @@ The AI doesn't automatically know your site structure—you teach it via the sys
 
 ```bash
 npm install ai-site-pilot
+
+# Choose your backend (pick ONE):
+npm install @google/genai          # Gemini (recommended, no AI SDK needed)
+npm install ai @ai-sdk/google      # Vercel AI SDK with Gemini
+npm install ai @ai-sdk/openai      # Vercel AI SDK with OpenAI
 ```
 
 ## Quick Start
 
 ### 1. Create the API Route
+
+**Option A: Gemini Direct (Recommended)** - No Vercel AI SDK needed!
+
+```typescript
+// app/api/chat/route.ts
+import { createGeminiHandler } from 'ai-site-pilot/api';
+import { defineTool } from 'ai-site-pilot/tools';
+
+const navigateTool = defineTool({
+  name: 'navigate',
+  description: 'Navigate to a section of the page',
+  parameters: {
+    type: 'object',
+    properties: {
+      section: {
+        type: 'string',
+        description: 'Section to navigate to',
+        enum: ['home', 'products', 'about', 'contact'],
+      },
+    },
+    required: ['section'],
+  },
+});
+
+export const POST = createGeminiHandler({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+  model: 'gemini-2.0-flash',
+  systemPrompt: `You are a helpful assistant for our website.
+You can navigate users to different sections using the navigate tool.`,
+  tools: [navigateTool],
+});
+```
+
+**Option B: Vercel AI SDK** - Works with any AI SDK provider
 
 ```typescript
 // app/api/chat/route.ts
@@ -152,9 +191,25 @@ interface SitePilotFeatures {
 }
 ```
 
+### `createGeminiHandler()`
+
+Factory for creating Next.js API route handlers using Gemini directly (no AI SDK needed).
+
+```typescript
+import { createGeminiHandler } from 'ai-site-pilot/api';
+
+export const POST = createGeminiHandler({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,  // Optional, uses env var by default
+  model: 'gemini-2.0-flash',                          // Default: gemini-2.0-flash
+  systemPrompt: 'You are a helpful assistant...',
+  tools: [myTool1, myTool2],
+  temperature: 0.7,
+});
+```
+
 ### `createChatHandler()`
 
-Factory for creating Next.js API route handlers.
+Factory for creating Next.js API route handlers using Vercel AI SDK.
 
 ```typescript
 import { createChatHandler } from 'ai-site-pilot/api';
@@ -318,11 +373,85 @@ const tools = [
 ];
 ```
 
+## Custom API Implementation
+
+If you need to implement your own API route (e.g., using a different AI provider), the widget expects Server-Sent Events (SSE) in this format:
+
+### SSE Streaming Format
+
+```
+data: {"type":"text","content":"Hello, "}
+
+data: {"type":"text","content":"how can I help?"}
+
+data: {"type":"tool","name":"navigate","args":{"section":"products"}}
+
+data: {"type":"done"}
+```
+
+#### Event Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `text` | Streaming text chunk | `{"type":"text","content":"Hello"}` |
+| `tool` | Tool/function call | `{"type":"tool","name":"navigate","args":{"section":"home"}}` |
+| `done` | Stream complete | `{"type":"done"}` |
+| `error` | Error occurred | `{"type":"error","message":"Something went wrong"}` |
+
+### SSE Utilities
+
+Use the built-in SSE helpers for custom implementations:
+
+```typescript
+import { createSSEEncoder, getSSEHeaders } from 'ai-site-pilot/api';
+
+export async function POST(req: Request) {
+  const sse = createSSEEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      // Stream text
+      controller.enqueue(sse.encodeText('Hello!'));
+
+      // Send tool call
+      controller.enqueue(sse.encodeTool('navigate', { section: 'products' }));
+
+      // Done
+      controller.enqueue(sse.encodeDone());
+      controller.close();
+    },
+  });
+
+  return new Response(stream, { headers: getSSEHeaders() });
+}
+```
+
+## Handling Tool-Only Responses
+
+When the AI calls tools without providing text, you can customize the fallback message:
+
+```typescript
+import { SitePilot, createFallbackMessageGenerator } from 'ai-site-pilot';
+
+const generateFallback = createFallbackMessageGenerator({
+  navigate: (args) => `Scrolled to **${args.section}** section.`,
+  filter_products: (args) => `Showing **${args.category}** products.`,
+  search: (args) => `Found results for "${args.query}".`,
+});
+
+<SitePilot
+  apiEndpoint="/api/chat"
+  generateFallbackMessage={generateFallback}
+/>
+```
+
 ## Requirements
 
 - React 18+ or React 19
 - Next.js 13+ (for API routes)
-- A Vercel AI SDK compatible model
+- One of:
+  - `@google/genai` (Gemini direct - recommended)
+  - `ai` + provider package (Vercel AI SDK)
 
 ## License
 
