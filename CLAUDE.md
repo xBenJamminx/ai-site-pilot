@@ -1,341 +1,119 @@
 # AI Instructions for ai-site-pilot
 
-This file provides instructions for AI coding assistants (Claude, GPT, Copilot, etc.) on how to integrate ai-site-pilot into projects.
+This file helps AI coding assistants (Claude, GPT, Copilot) integrate ai-site-pilot into projects.
 
 ## What is ai-site-pilot?
 
-A drop-in AI chat widget that can **control and navigate websites**. It's not just a chatbot - the AI can execute tools to filter content, open modals, navigate sections, and more.
+A drop-in AI chat widget that can **control and navigate websites**. The AI can execute tools to filter content, open modals, navigate sections, and more.
 
-## ⚠️ IMPORTANT: How the AI Learns Your Site
+**Key features:**
+- Works with any AI model via OpenRouter (Gemini, GPT-4, Claude, Llama)
+- Free tier available (Gemini 2.0 Flash)
+- Auto-generates system prompts from site content
+- Streaming responses with tool execution
 
-The package provides chat UI and streaming. **The AI doesn't automatically know your site structure.** You must:
+## Quick Setup (Recommended)
 
-1. **Tell it what exists** - In the system prompt, list your sections, data, categories
-2. **Define tools** - Create tools that match your site's DOM and state
-3. **Write handlers** - Client-side code that executes the actual actions
-
-### Example: Teaching the AI About Your Site
-
-```typescript
-// In your API route - this is the MOST IMPORTANT part
-const SYSTEM_PROMPT = `You are an AI assistant for MyStore.
-
-## SITE STRUCTURE
-The page has these sections (use navigate_to_section tool):
-- hero: Top of page with tagline
-- products: Product grid (id="products")
-- about: About us section (id="about")
-- contact: Contact form (id="contact")
-
-## AVAILABLE DATA
-Products on this site:
-- Electronics: laptops, phones, tablets
-- Clothing: shirts, pants, shoes
-- Home: furniture, decor, kitchen
-
-Categories for filtering: electronics, clothing, home, all
-
-## YOUR TOOLS
-- navigate_to_section: Scroll to a section by ID
-- filter_products: Filter the product grid by category
-- open_product_modal: Show details for a specific product (use product slug)
-- open_contact: Open the contact modal
-
-## BEHAVIOR
-- When users ask about products, use filter_products to show relevant category
-- When users want details, use open_product_modal
-- When users want to buy/contact, use open_contact
-- Always be helpful and proactively use tools to show relevant content`;
-```
-
-The system prompt teaches the AI:
-- What sections exist and their IDs
-- What data/content is available
-- What tools it can use and when
-- How to behave (proactively use tools)
-
-## Quick Setup (Copy-Paste Ready)
-
-### 1. Install the package
+### 1. Install
 
 ```bash
 npm install ai-site-pilot
 ```
 
-### 2. Create the API route
+### 2. Configure Tailwind (Required)
 
-Create `app/api/chat/route.ts` (Next.js App Router):
+Add to `tailwind.config.js`:
 
-```typescript
-import { streamText } from 'ai';
-import { google } from '@ai-sdk/google';
-// Or use any Vercel AI SDK provider:
-// import { openai } from '@ai-sdk/openai';
-// import { anthropic } from '@ai-sdk/anthropic';
-
-const SYSTEM_PROMPT = `You are a helpful AI assistant for this website. You can help users navigate and find information.
-
-## YOUR CAPABILITIES
-You have access to tools that control the website:
-- navigate_to_section: Scroll to different sections
-- open_modal: Open detail modals
-- filter_content: Filter displayed content
-- search: Search the site
-
-Use these tools proactively when relevant to the user's request.`;
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: google('gemini-2.0-flash'),
-    system: SYSTEM_PROMPT,
-    messages,
-    tools: {
-      // Define your site-specific tools here
-      navigate_to_section: {
-        description: 'Scroll to a section of the page',
-        parameters: {
-          type: 'object',
-          properties: {
-            section: { type: 'string', enum: ['hero', 'features', 'pricing', 'contact'] }
-          },
-          required: ['section']
-        }
-      },
-      // Add more tools as needed
-    },
-  });
-
-  return result.toDataStreamResponse();
+```js
+module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './node_modules/ai-site-pilot/dist/**/*.{js,mjs}',  // Required!
+  ],
 }
 ```
 
-### 3. Add the chat widget
+### 3. Create API Route with `siteContent`
 
-In your layout or page component:
-
-```tsx
-'use client';
-
-import { SitePilot } from 'ai-site-pilot';
-import 'ai-site-pilot/styles.css';
-
-export function ChatWidget() {
-  const handleToolCall = (name: string, args: Record<string, unknown>) => {
-    // Handle tool execution - this runs on the client
-    switch (name) {
-      case 'navigate_to_section':
-        document.getElementById(args.section as string)?.scrollIntoView({ behavior: 'smooth' });
-        break;
-      case 'open_modal':
-        // Your modal logic
-        break;
-      // Handle other tools
-    }
-  };
-
-  return (
-    <SitePilot
-      apiEndpoint="/api/chat"
-      onToolCall={handleToolCall}
-      suggestions={[
-        { text: 'Show me features', icon: '✨' },
-        { text: 'How does pricing work?', icon: '💰' },
-        { text: 'Contact sales', icon: '📞' },
-      ]}
-      welcomeMessage="Hi! I can help you explore this site. What would you like to know?"
-      theme={{
-        accentColor: '#3b82f6',      // Your brand color
-        backgroundColor: '#0f172a',   // Dark background
-        // See full theme options below
-      }}
-    />
-  );
-}
-```
-
-## Theme Customization
-
-All colors accept any CSS color value (hex, rgb, hsl, etc.):
-
-```tsx
-<SitePilot
-  theme={{
-    // Position
-    position: 'bottom-right',  // 'bottom-left', 'top-right', 'top-left'
-    borderRadius: 24,          // pixels
-
-    // Colors
-    accentColor: '#f59e0b',           // Primary accent (buttons, highlights)
-    accentColorDark: '#d97706',       // Gradient end color
-    backgroundColor: '#0F0720',        // Panel background
-    textColor: '#ffffff',              // Primary text
-    textMutedColor: '#a1a1aa',        // Secondary text
-    borderColor: 'rgba(255,255,255,0.1)',
-
-    // Message bubbles
-    userMessageBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
-    assistantMessageBg: 'rgba(255,255,255,0.05)',
-  }}
-/>
-```
-
-## Feature Toggles
-
-```tsx
-<SitePilot
-  features={{
-    speech: true,       // Voice input (microphone)
-    tts: true,          // Text-to-speech for responses
-    fullscreen: true,   // Fullscreen toggle button
-    suggestions: true,  // Show suggestion chips
-  }}
-/>
-```
-
-## Tool System
-
-Define tools that the AI can call to control your site:
-
-```typescript
-// Using the defineTool helper (optional, for type safety)
-import { defineTool } from 'ai-site-pilot/tools';
-
-const filterProductsTool = defineTool({
-  name: 'filter_products',
-  description: 'Filter products by category',
-  parameters: {
-    type: 'object',
-    properties: {
-      category: {
-        type: 'string',
-        description: 'Product category',
-        enum: ['electronics', 'clothing', 'home', 'all']
-      }
-    },
-    required: ['category']
-  }
-});
-```
-
-## Environment Variables
-
-For the API route, you'll need your AI provider's API key:
-
-```env
-# For Google Gemini
-GOOGLE_GENERATIVE_AI_API_KEY=your-key-here
-
-# Or for OpenAI
-OPENAI_API_KEY=your-key-here
-
-# Or for Anthropic
-ANTHROPIC_API_KEY=your-key-here
-```
-
-## Complete Real-World Example
-
-Here's a full implementation for a portfolio site showing all three parts:
-
-### Part 1: System Prompt (teaches the AI what exists)
+The easiest way - just pass your site's data and the prompt is auto-generated:
 
 ```typescript
 // app/api/chat/route.ts
-const PROJECTS = `
-Available projects (use open_project_modal with these IDs):
-- acme-dashboard: Acme Dashboard (SaaS, Live) - Analytics platform
-- mobile-app: FitTrack (Mobile, Live) - Fitness tracking app
-- ecommerce: ShopFlow (E-commerce, In Progress) - Online store template
-- api-service: DataSync API (Backend, Live) - Data synchronization service
+import { createHandler } from 'ai-site-pilot/api';
+import { defineTool } from 'ai-site-pilot/tools';
 
-Categories: All, SaaS, Mobile, E-commerce, Backend
-Statuses: Live, In Progress, Concept
-`;
-
-const SYSTEM_PROMPT = `You are a portfolio assistant for Jane Developer.
-
-## SITE SECTIONS
-- hero: Landing section with intro (id="hero")
-- projects: Project showcase grid (id="projects")
-- about: About section (id="about")
-- contact: Contact form (id="contact")
-
-## PROJECT DATA
-${PROJECTS}
-
-## YOUR TOOLS
-- navigate_to_section: Scroll to hero, projects, about, or contact
-- filter_by_category: Filter projects (SaaS, Mobile, E-commerce, Backend, All)
-- filter_by_status: Filter by status (Live, In Progress, Concept)
-- open_project_modal: Open project details (use project ID like "acme-dashboard")
-- highlight_project: Pulse animation on a project card
-- open_contact: Open contact/hire modal
-
-## WHEN TO USE TOOLS
-- "Show me your work" → navigate_to_section("projects")
-- "Any mobile apps?" → filter_by_category("Mobile")
-- "What's live?" → filter_by_status("Live")
-- "Tell me about Acme" → open_project_modal("acme-dashboard")
-- "I want to hire you" → open_contact()
-
-Be conversational but proactively use tools to make the site interactive.`;
-```
-
-### Part 2: Tool Definitions (what the AI can call)
-
-```typescript
-// app/api/chat/route.ts (continued)
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: google('gemini-2.0-flash'),
-    system: SYSTEM_PROMPT,
-    messages,
-    tools: {
-      navigate_to_section: {
-        description: 'Scroll to a page section',
-        parameters: {
-          type: 'object',
-          properties: {
-            section: { type: 'string', enum: ['hero', 'projects', 'about', 'contact'] }
-          },
-          required: ['section']
-        }
+// Define tools the AI can use
+const navigateTool = defineTool({
+  name: 'navigate_to_section',
+  description: 'Scroll to a section of the page',
+  parameters: {
+    type: 'object',
+    properties: {
+      section: {
+        type: 'string',
+        description: 'Section ID to navigate to',
+        enum: ['hero', 'services', 'about', 'contact'],
       },
-      filter_by_category: {
-        description: 'Filter projects by category',
-        parameters: {
-          type: 'object',
-          properties: {
-            category: { type: 'string', enum: ['All', 'SaaS', 'Mobile', 'E-commerce', 'Backend'] }
-          },
-          required: ['category']
-        }
-      },
-      open_project_modal: {
-        description: 'Open project detail modal',
-        parameters: {
-          type: 'object',
-          properties: {
-            projectId: { type: 'string', description: 'Project ID like acme-dashboard' }
-          },
-          required: ['projectId']
-        }
-      },
-      open_contact: {
-        description: 'Open the contact/hire modal',
-        parameters: { type: 'object', properties: {}, required: [] }
-      }
     },
-  });
+    required: ['section'],
+  },
+});
 
-  return result.toDataStreamResponse();
-}
+const showServiceTool = defineTool({
+  name: 'show_service',
+  description: 'Show details about a specific service',
+  parameters: {
+    type: 'object',
+    properties: {
+      serviceId: {
+        type: 'string',
+        description: 'The service ID',
+      },
+    },
+    required: ['serviceId'],
+  },
+});
+
+// Create handler with site content - prompt is auto-generated!
+export const POST = createHandler({
+  model: 'google/gemini-2.0-flash-exp:free',  // Free!
+  siteContent: {
+    name: 'Acme Dance Studio',
+    type: 'dance studio',
+    description: 'Premier dance education for all ages',
+    personality: 'warm, encouraging, and helpful',
+    pages: ['home', 'classes', 'teachers', 'schedule', 'contact'],
+    items: [
+      // Classes
+      { id: 'ballet', name: 'Ballet', category: 'class', description: 'Classical ballet for ages 3-adult', price: '$80/month' },
+      { id: 'jazz', name: 'Jazz', category: 'class', description: 'High-energy jazz for ages 6+', price: '$75/month' },
+      { id: 'hip-hop', name: 'Hip Hop', category: 'class', description: 'Street dance styles for ages 8+', price: '$70/month' },
+      // Teachers
+      { id: 'sarah', name: 'Sarah Johnson', category: 'teacher', description: 'Owner, 15 years experience, specializes in ballet' },
+      { id: 'mike', name: 'Mike Chen', category: 'teacher', description: 'Hip hop and jazz instructor, 8 years experience' },
+    ],
+    faqs: [
+      { question: 'What should I wear?', answer: 'Leotard and ballet slippers for ballet, athletic wear for jazz and hip hop.' },
+      { question: 'Do you offer trial classes?', answer: 'Yes! First class is free for new students.' },
+    ],
+    contact: {
+      email: 'info@acmedance.com',
+      phone: '555-123-4567',
+      address: '123 Dance Street, NYC',
+      hours: 'Mon-Sat 9am-8pm',
+    },
+  },
+  tools: [navigateTool, showServiceTool],
+});
 ```
 
-### Part 3: Client Handler (executes the actions)
+**The AI now automatically knows:**
+- All your classes, teachers, pricing
+- FAQs and contact info
+- What tools to use and when
+
+### 4. Add the Chat Widget
 
 ```tsx
 // components/ChatWidget.tsx
@@ -349,25 +127,14 @@ export function ChatWidget() {
     switch (name) {
       case 'navigate_to_section':
         document.getElementById(args.section as string)?.scrollIntoView({
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
         break;
-
-      case 'filter_by_category':
-        // Dispatch custom event for your page to handle
-        window.dispatchEvent(new CustomEvent('filter-projects', {
-          detail: { category: args.category }
+      case 'show_service':
+        // Dispatch event for your page to handle
+        window.dispatchEvent(new CustomEvent('show-service', {
+          detail: { serviceId: args.serviceId },
         }));
-        break;
-
-      case 'open_project_modal':
-        window.dispatchEvent(new CustomEvent('open-project', {
-          detail: { projectId: args.projectId }
-        }));
-        break;
-
-      case 'open_contact':
-        window.dispatchEvent(new CustomEvent('open-contact'));
         break;
     }
   };
@@ -377,110 +144,237 @@ export function ChatWidget() {
       apiEndpoint="/api/chat"
       onToolCall={handleToolCall}
       suggestions={[
-        { text: "Show me your work", icon: "💼" },
-        { text: "What's live?", icon: "🚀" },
-        { text: "I want to hire you", icon: "💡" },
+        { text: 'What classes do you offer?', icon: '💃' },
+        { text: 'Meet the teachers', icon: '👩‍🏫' },
+        { text: 'Contact us', icon: '📞' },
       ]}
-      theme={{
-        accentColor: '#8b5cf6',
-        backgroundColor: '#0f0f23',
-      }}
+      theme={{ accent: 'pink' }}  // or accentColor: '#ec4899'
+      welcomeMessage="Hi! I'm your dance studio assistant. How can I help you today?"
     />
   );
 }
 ```
 
-### Part 4: Page Listens for Events
+### 5. Environment Variable
+
+```bash
+# .env.local
+OPENROUTER_API_KEY=sk-or-...
+```
+
+Get a free key at [openrouter.ai](https://openrouter.ai) - Gemini 2.0 Flash is free!
+
+## Alternative: Manual System Prompt
+
+If you need full control, use `systemPrompt` instead of `siteContent`:
+
+```typescript
+export const POST = createHandler({
+  model: 'google/gemini-2.0-flash-exp:free',
+  systemPrompt: `You are an assistant for Acme Dance Studio.
+
+## Classes
+- Ballet: Ages 3-adult, $80/month
+- Jazz: Ages 6+, $75/month
+- Hip Hop: Ages 8+, $70/month
+
+## Tools
+- navigate_to_section: Scroll to a section (hero, classes, teachers, contact)
+- show_service: Show details about a class
+
+When users ask about classes, provide specific details.
+Use tools proactively to show relevant content.`,
+  tools: [navigateTool, showServiceTool],
+});
+```
+
+## SiteContent Schema
+
+```typescript
+interface SiteContent {
+  name: string;                    // Business name
+  type?: string;                   // Business type (e.g., 'dance studio')
+  description?: string;            // Brief description
+  personality?: string;            // AI personality (e.g., 'warm and helpful')
+  pages?: string[];                // Available navigation pages
+  items?: SiteContentItem[];       // Products, services, team, etc.
+  faqs?: Array<{ question: string; answer: string }>;
+  contact?: {
+    email?: string;
+    phone?: string;
+    address?: string;
+    hours?: string;
+  };
+  additionalContext?: string;      // Extra info for the prompt
+}
+
+interface SiteContentItem {
+  id: string;                      // Unique identifier
+  name: string;                    // Display name
+  category?: string;               // Category (e.g., 'class', 'teacher', 'product')
+  description?: string;            // Description
+  [key: string]: unknown;          // Any extra fields (price, duration, etc.)
+}
+```
+
+## Theme Presets
+
+Use preset names for easy theming:
 
 ```tsx
-// app/page.tsx or components/HomePage.tsx
-'use client';
+<SitePilot theme={{ accent: 'pink' }} />   // Hot pink
+<SitePilot theme={{ accent: 'amber' }} />  // Default orange/amber
+<SitePilot theme={{ accent: 'blue' }} />   // Primary blue
+<SitePilot theme={{ accent: 'green' }} />  // Emerald green
+<SitePilot theme={{ accent: 'purple' }} /> // Violet purple
+<SitePilot theme={{ accent: 'cyan' }} />   // Teal cyan
+```
 
-import { useEffect, useState } from 'react';
+Or use a custom hex color:
 
-export function HomePage() {
-  const [filter, setFilter] = useState('All');
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [showContact, setShowContact] = useState(false);
+```tsx
+<SitePilot theme={{ accentColor: '#8b5cf6' }} />
+```
 
-  useEffect(() => {
-    const handleFilter = (e: CustomEvent) => setFilter(e.detail.category);
-    const handleProject = (e: CustomEvent) => setSelectedProject(e.detail.projectId);
-    const handleContact = () => setShowContact(true);
+## Tool-Only Response Handling
 
-    window.addEventListener('filter-projects', handleFilter as EventListener);
-    window.addEventListener('open-project', handleProject as EventListener);
-    window.addEventListener('open-contact', handleContact);
+When the AI uses tools without text, customize the fallback message:
 
-    return () => {
-      window.removeEventListener('filter-projects', handleFilter as EventListener);
-      window.removeEventListener('open-project', handleProject as EventListener);
-      window.removeEventListener('open-contact', handleContact);
-    };
-  }, []);
+```tsx
+import { SitePilot, createFallbackMessageGenerator } from 'ai-site-pilot';
 
-  // Your page components use filter, selectedProject, showContact state...
+const generateFallback = createFallbackMessageGenerator({
+  navigate_to_section: (args) => `Scrolled to **${args.section}**.`,
+  show_service: (args) => `Showing details for **${args.serviceId}**.`,
+  filter_products: (args) => `Filtered to **${args.category}** products.`,
+});
+
+<SitePilot
+  apiEndpoint="/api/chat"
+  generateFallbackMessage={generateFallback}
+/>
+```
+
+## Full Props Reference
+
+```typescript
+interface SitePilotProps {
+  // Required
+  apiEndpoint: string;
+
+  // Tool handling
+  onToolCall?: (name: string, args: Record<string, unknown>) => void;
+  generateFallbackMessage?: (toolName: string, args: Record<string, unknown>) => string;
+
+  // UI customization
+  suggestions?: Array<{ text: string; icon?: string }>;
+  welcomeMessage?: string;
+  placeholder?: string;
+  defaultOpen?: boolean;
+  position?: 'bottom-right' | 'bottom-left';
+
+  // Theme
+  theme?: {
+    accent?: 'amber' | 'pink' | 'blue' | 'green' | 'purple' | 'red' | 'cyan' | 'orange';
+    accentColor?: string;  // Hex color (overrides accent)
+    backgroundColor?: string;
+    radius?: number;
+  };
+
+  // Features
+  features?: {
+    speech?: boolean;      // Voice input
+    tts?: boolean;         // Text-to-speech
+    fullscreen?: boolean;  // Fullscreen toggle
+  };
 }
 ```
 
 ## Common Patterns
 
 ### E-commerce Site
-```tsx
-const tools = {
-  search_products: { /* search inventory */ },
-  filter_by_category: { /* filter product grid */ },
-  add_to_cart: { /* add item to cart */ },
-  open_product: { /* show product details */ },
-};
-```
 
-### Documentation Site
-```tsx
-const tools = {
-  search_docs: { /* search documentation */ },
-  navigate_to_page: { /* go to specific doc page */ },
-  show_code_example: { /* display code snippet */ },
-};
+```typescript
+siteContent: {
+  name: 'MyStore',
+  type: 'online store',
+  items: [
+    { id: 'laptop-1', name: 'MacBook Pro', category: 'product', price: '$1999', inStock: true },
+    { id: 'phone-1', name: 'iPhone 15', category: 'product', price: '$999', inStock: true },
+  ],
+  pages: ['home', 'products', 'cart', 'checkout'],
+}
+
+// Tools: search_products, filter_by_category, add_to_cart, open_product
 ```
 
 ### Portfolio Site
-```tsx
-const tools = {
-  filter_projects: { /* filter by category/status */ },
-  open_project_modal: { /* show project details */ },
-  navigate_to_section: { /* scroll to section */ },
-  open_contact: { /* open contact form */ },
-};
+
+```typescript
+siteContent: {
+  name: 'Jane Developer',
+  type: 'portfolio',
+  items: [
+    { id: 'project-1', name: 'Acme Dashboard', category: 'project', status: 'Live', tech: 'React, Node' },
+    { id: 'project-2', name: 'FitTrack App', category: 'project', status: 'Live', tech: 'React Native' },
+  ],
+  pages: ['hero', 'projects', 'about', 'contact'],
+}
+
+// Tools: filter_projects, open_project_modal, navigate_to_section, open_contact
+```
+
+### SaaS Landing Page
+
+```typescript
+siteContent: {
+  name: 'CloudSync',
+  type: 'SaaS platform',
+  description: 'Real-time data synchronization for teams',
+  items: [
+    { id: 'starter', name: 'Starter Plan', category: 'pricing', price: '$9/mo', features: '5 users, 10GB' },
+    { id: 'pro', name: 'Pro Plan', category: 'pricing', price: '$29/mo', features: '25 users, 100GB' },
+  ],
+  faqs: [
+    { question: 'Is there a free trial?', answer: 'Yes, 14-day free trial on all plans.' },
+  ],
+}
+
+// Tools: navigate_to_section, show_pricing, open_signup, open_demo
 ```
 
 ## Troubleshooting
 
-**Chat not appearing?**
-- Make sure you imported the CSS: `import 'ai-site-pilot/styles.css'`
-- Check that the component is rendered (use React DevTools)
-
-**Tools not executing?**
-- Verify `onToolCall` is passed to SitePilot
-- Check browser console for the tool calls
-- Make sure tool names match between API and client
-
-**Styling issues?**
-- CSS variables can be overridden in your global CSS
-- The component uses `z-index: 200` - adjust if needed
-
-## Full Props Reference
-
-```typescript
-interface SitePilotProps {
-  apiEndpoint: string;              // Required: Your chat API endpoint
-  theme?: SitePilotTheme;           // Theme customization
-  suggestions?: Suggestion[];        // Suggestion chips
-  features?: SitePilotFeatures;      // Feature toggles
-  onToolCall?: (name: string, args: Record<string, unknown>) => void;
-  defaultOpen?: boolean;             // Start with chat open
-  placeholder?: string;              // Input placeholder
-  welcomeMessage?: string;           // Initial greeting
-  className?: string;                // Additional CSS class
-}
+### Button only shows icon, no "Ask AI" text
+Your Tailwind config isn't scanning the package:
+```js
+content: ['./node_modules/ai-site-pilot/dist/**/*.{js,mjs}']
 ```
+
+### Theme colors not working
+Use component props, not CSS variables:
+```tsx
+// Good
+<SitePilot theme={{ accent: 'pink' }} />
+
+// Bad - don't set CSS vars directly
+```
+
+### AI gives generic responses
+Use `siteContent` to provide actual data about your site. The AI only knows what you tell it.
+
+### Tools not executing
+1. Check `onToolCall` is passed to SitePilot
+2. Verify tool names match between API and client handler
+3. Check browser console for errors
+
+## Available Models
+
+| Model | ID | Notes |
+|-------|-----|-------|
+| Gemini 2.0 Flash | `google/gemini-2.0-flash-exp:free` | **Free!** Default |
+| GPT-4o | `openai/gpt-4o` | Best overall |
+| Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
+| Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
+
+See all models at [openrouter.ai/models](https://openrouter.ai/models)
