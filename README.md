@@ -29,6 +29,8 @@ npm install ai-site-pilot
 
 Sign up at [openrouter.ai](https://openrouter.ai) and get your API key.
 
+> **💡 Free tier:** Gemini 2.0 Flash (`google/gemini-2.0-flash-exp:free`) is completely free on OpenRouter—no credit card required. Perfect for getting started!
+
 ### 2. Create the API Route
 
 ```typescript
