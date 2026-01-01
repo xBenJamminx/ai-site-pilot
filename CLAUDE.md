@@ -12,6 +12,83 @@ A drop-in AI chat widget that can **control and navigate websites**. The AI can 
 - Auto-generates system prompts from site content
 - Streaming responses with tool execution
 
+## IMPORTANT: Keeping Chatbot in Sync with Site Content
+
+**The chatbot must always reflect the current site content.** To achieve this:
+
+1. **Find where site data lives** - Look for constants files, data files, CMS exports, or API endpoints that contain the site's content (products, services, team, etc.)
+
+2. **Import from the same source** - The API route should import from these existing data sources, NOT duplicate the data
+
+3. **Maintain this pattern** - When updating site content, the chatbot automatically stays in sync
+
+### Example Pattern
+
+```typescript
+// lib/data.ts - The site's single source of truth
+export const CLASSES = [
+  { id: 'ballet', name: 'Ballet', description: 'Classical ballet', price: '$80/mo' },
+  { id: 'jazz', name: 'Jazz', description: 'High-energy jazz', price: '$75/mo' },
+];
+
+export const TEACHERS = [
+  { id: 'sarah', name: 'Sarah Johnson', role: 'Owner', bio: '15 years experience' },
+];
+
+export const SITE_INFO = {
+  name: 'Dance Studio',
+  email: 'info@studio.com',
+  phone: '555-1234',
+};
+```
+
+```typescript
+// app/api/chat/route.ts - Imports from the SAME source
+import { CLASSES, TEACHERS, SITE_INFO } from '@/lib/data';
+import { createHandler } from 'ai-site-pilot/api';
+
+export const POST = createHandler({
+  siteContent: {
+    name: SITE_INFO.name,
+    items: [
+      ...CLASSES.map(c => ({ ...c, category: 'class' })),
+      ...TEACHERS.map(t => ({ ...t, category: 'teacher' })),
+    ],
+    contact: {
+      email: SITE_INFO.email,
+      phone: SITE_INFO.phone,
+    },
+  },
+  tools,
+});
+```
+
+```tsx
+// components/ClassList.tsx - Also uses the same source
+import { CLASSES } from '@/lib/data';
+
+export function ClassList() {
+  return CLASSES.map(c => <ClassCard key={c.id} {...c} />);
+}
+```
+
+**Update `lib/data.ts` → Both site AND chatbot update automatically.**
+
+### When Setting Up a New Project
+
+As an AI assistant, you should:
+
+1. **Scan the codebase** for existing data files:
+   - `constants.ts`, `data.ts`, `config.ts`
+   - `lib/`, `data/`, `content/` directories
+   - JSON files with site content
+
+2. **Identify the data structure** - What does the site display? Products? Services? Team members?
+
+3. **Create the API route** that imports from these existing sources
+
+4. **Never duplicate data** - If you can't find existing data files, create ONE shared file that both the site and chatbot use
+
 ## Quick Setup (Recommended)
 
 ### 1. Install
