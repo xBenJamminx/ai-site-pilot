@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageCircle, Sparkles, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
+import { X, MessageCircle, Sparkles, Volume2, VolumeX, Maximize2, Minimize2, Minus, GripVertical } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import { useSpeech } from '../hooks/useSpeech';
 import { ChatMessage } from './ChatMessage';
@@ -122,14 +122,19 @@ export function SitePilot({
     tts = true,
     fullscreen = true,
     suggestions: showSuggestionsFeature = true,
+    minimize: showMinimize = false,
+    draggable = false,
   } = features;
 
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const dragConstraintsRef = useRef<HTMLDivElement>(null);
 
   // Set up portal container for fullscreen mode (renders outside any transform context)
   useEffect(() => {
@@ -299,6 +304,15 @@ export function SitePilot({
                     )}
                   </button>
                 )}
+                {showMinimize && (
+                  <button
+                    onClick={() => setIsMinimized(true)}
+                    className="p-2 rounded-lg transition-colors pilot-button-inactive"
+                    title="Minimize"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-2 hover:bg-white/5 rounded-lg transition-colors"
@@ -364,15 +378,67 @@ export function SitePilot({
     </motion.div>
   );
 
+  // Minimized state - show floating button
+  if (isMinimized && showMinimize) {
+    return (
+      <button
+        onClick={() => setIsMinimized(false)}
+        className={`fixed ${buttonPositionClasses[position]} z-[200] w-14 h-14 pilot-toggle-button rounded-full flex items-center justify-center shadow-xl cursor-pointer`}
+        style={cssVars}
+      >
+        <MessageCircle className="w-6 h-6" />
+      </button>
+    );
+  }
+
+  // Wrap panel in draggable container if draggable feature is enabled
+  const renderPanel = () => {
+    if (!isOpen) return null;
+
+    // Use portal for fullscreen mode
+    if (isFullscreen && portalContainer) {
+      return createPortal(chatPanel, portalContainer);
+    }
+
+    // Draggable wrapper
+    if (draggable && !isFullscreen) {
+      return (
+        <motion.div
+          drag
+          dragConstraints={dragConstraintsRef}
+          dragElastic={0.05}
+          dragMomentum={false}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={() => setIsDragging(false)}
+          className={`fixed ${buttonPositionClasses[position]} z-[200] ${isDragging ? 'cursor-grabbing' : ''}`}
+          style={{ touchAction: 'none' }}
+        >
+          {/* Drag handle indicator */}
+          <div
+            className={`absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/10 backdrop-blur border border-white/20 cursor-grab active:cursor-grabbing transition-opacity ${
+              isDragging ? 'opacity-100' : 'opacity-0 hover:opacity-100'
+            }`}
+          >
+            <GripVertical className="w-4 h-4 text-white/60" />
+          </div>
+          {chatPanel}
+        </motion.div>
+      );
+    }
+
+    return chatPanel;
+  };
+
   return (
     <div className={`pilot-container ${className}`} style={cssVars}>
-      {/* Chat Panel - use portal when fullscreen to escape transform context */}
+      {/* Drag constraints for draggable mode */}
+      {draggable && (
+        <div ref={dragConstraintsRef} className="fixed top-0 left-0 -bottom-4 -right-4 pointer-events-none z-40" />
+      )}
+
+      {/* Chat Panel */}
       <AnimatePresence>
-        {isOpen && (
-          isFullscreen && portalContainer
-            ? createPortal(chatPanel, portalContainer)
-            : chatPanel
-        )}
+        {renderPanel()}
       </AnimatePresence>
 
       {/* Toggle Button */}

@@ -71,6 +71,10 @@ export interface SitePilotFeatures {
   fullscreen?: boolean;
   /** Show suggestion chips */
   suggestions?: boolean;
+  /** Enable minimize button to collapse to floating icon */
+  minimize?: boolean;
+  /** Enable dragging the chat panel around the screen */
+  draggable?: boolean;
 }
 
 // Main component props

@@ -1,6 +1,6 @@
 {
   "name": "ai-site-pilot",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "AI chat widget that can control and navigate your website. Works with any AI model via OpenRouter.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
