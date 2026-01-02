@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageCircle, Sparkles, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
@@ -126,8 +127,14 @@ export function SitePilot({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Set up portal container for fullscreen mode (renders outside any transform context)
+  useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
 
   // Initial welcome message
   const initialMessages: ChatMessageType[] = welcomeMessage
@@ -235,24 +242,20 @@ export function SitePilot({
     ...(assistantMessageBg && { '--pilot-assistant-bg': assistantMessageBg }),
   } as React.CSSProperties;
 
-  return (
-    <div className={`pilot-container ${className}`} style={cssVars}>
-      {/* Chat Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            layout
-            className={`fixed pilot-panel flex flex-col shadow-2xl z-[200] transition-all duration-300 ${
-              isFullscreen
-                ? 'inset-4 md:inset-8'
-                : `${positionClasses[position]} w-[calc(100%-48px)] md:w-[400px] h-[520px]`
-            }`}
-            style={{ borderRadius: `${borderRadius}px` }}
-          >
+  // The chat panel content
+  const chatPanel = (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 20, scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      className={`fixed pilot-panel flex flex-col shadow-2xl z-[200] transition-all duration-300 ${
+        isFullscreen
+          ? 'inset-4 md:inset-8'
+          : `${positionClasses[position]} w-[calc(100%-48px)] md:w-[400px] h-[520px]`
+      }`}
+      style={{ borderRadius: `${borderRadius}px`, ...cssVars } as React.CSSProperties}
+    >
             {/* Header */}
             <div className="px-5 py-4 pilot-border-bottom flex justify-between items-center">
               <div className="flex items-center gap-3">
@@ -348,17 +351,27 @@ export function SitePilot({
             </div>
 
             {/* Input Area */}
-            <ChatInput
-              value={input}
-              onChange={setInput}
-              onSubmit={handleSubmit}
-              disabled={isLoading}
-              placeholder={placeholder}
-              isListening={isListening}
-              onToggleListening={toggleListening}
-              showMic={speech && speechSupported}
-            />
-          </motion.div>
+      <ChatInput
+        value={input}
+        onChange={setInput}
+        onSubmit={handleSubmit}
+        disabled={isLoading}
+        placeholder={placeholder}
+        isListening={isListening}
+        onToggleListening={toggleListening}
+        showMic={speech && speechSupported}
+      />
+    </motion.div>
+  );
+
+  return (
+    <div className={`pilot-container ${className}`} style={cssVars}>
+      {/* Chat Panel - use portal when fullscreen to escape transform context */}
+      <AnimatePresence>
+        {isOpen && (
+          isFullscreen && portalContainer
+            ? createPortal(chatPanel, portalContainer)
+            : chatPanel
         )}
       </AnimatePresence>
 
