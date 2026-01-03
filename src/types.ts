@@ -75,6 +75,8 @@ export interface SitePilotFeatures {
   minimize?: boolean;
   /** Enable dragging the chat panel around the screen */
   draggable?: boolean;
+  /** Enable clear chat button to reset conversation */
+  clearChat?: boolean;
 }
 
 // Main component props

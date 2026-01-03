@@ -13,8 +13,14 @@
  */
 
 .pilot-container {
-  /* Container should not interfere with fixed children */
-  position: relative;
+  /* Container must not block page interactions */
+  position: fixed;
+  inset: auto;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
   z-index: 199;
   pointer-events: none;
 

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageCircle, Sparkles, Volume2, VolumeX, Maximize2, Minimize2, Minus, GripVertical } from 'lucide-react';
+import { X, MessageCircle, Sparkles, Volume2, VolumeX, Maximize2, Minimize2, Minus, GripVertical, RotateCcw } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import { useSpeech } from '../hooks/useSpeech';
 import { ChatMessage } from './ChatMessage';
@@ -124,13 +124,13 @@ export function SitePilot({
     suggestions: showSuggestionsFeature = true,
     minimize: showMinimize = false,
     draggable = false,
+    clearChat: showClearChat = false,
   } = features;
 
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -160,6 +160,7 @@ export function SitePilot({
     isLoading,
     streamingMessageId,
     sendMessage,
+    clearMessages,
   } = useChat({
     apiEndpoint,
     initialMessages,
@@ -213,6 +214,11 @@ export function SitePilot({
   const handleSubmit = useCallback(() => {
     sendMessage();
   }, [sendMessage]);
+
+  const handleClearChat = useCallback(() => {
+    clearMessages();
+    setShowSuggestions(true);
+  }, [clearMessages]);
 
   // Position classes
   const positionClasses = {
@@ -291,6 +297,15 @@ export function SitePilot({
                     )}
                   </button>
                 )}
+                {showClearChat && (
+                  <button
+                    onClick={handleClearChat}
+                    className="p-2 rounded-lg transition-colors pilot-button-inactive"
+                    title="Clear chat"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                )}
                 {fullscreen && (
                   <button
                     onClick={() => setIsFullscreen(!isFullscreen)}
@@ -306,7 +321,7 @@ export function SitePilot({
                 )}
                 {showMinimize && (
                   <button
-                    onClick={() => setIsMinimized(true)}
+                    onClick={() => setIsOpen(false)}
                     className="p-2 rounded-lg transition-colors pilot-button-inactive"
                     title="Minimize"
                   >
@@ -378,26 +393,18 @@ export function SitePilot({
     </motion.div>
   );
 
-  // Minimized state - show floating button
-  if (isMinimized && showMinimize) {
-    return (
-      <button
-        onClick={() => setIsMinimized(false)}
-        className={`fixed ${buttonPositionClasses[position]} z-[200] w-14 h-14 pilot-toggle-button rounded-full flex items-center justify-center shadow-xl cursor-pointer`}
-        style={cssVars}
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
-    );
-  }
-
   // Wrap panel in draggable container if draggable feature is enabled
   const renderPanel = () => {
     if (!isOpen) return null;
 
-    // Use portal for fullscreen mode
+    // Use portal for fullscreen mode (wraps in container with CSS vars)
     if (isFullscreen && portalContainer) {
-      return createPortal(chatPanel, portalContainer);
+      return createPortal(
+        <div className="pilot-container" style={cssVars}>
+          {chatPanel}
+        </div>,
+        portalContainer
+      );
     }
 
     // Draggable wrapper
