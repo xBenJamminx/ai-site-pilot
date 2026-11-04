@@ -201,7 +201,7 @@ async function streamGatewayResponse(
 /**
  * Create a Next.js API route handler backed by Vercel AI Gateway
  *
- * Auth comes from AI_GATEWAY_API_KEY, or VERCEL_OIDC_TOKEN when deployed on
+ * Auth comes from AI_GATEWAY_API_KEY, or the Vercel OIDC token when deployed on
  * Vercel (run `vercel env pull` locally to get a fresh token).
  *
  * @example
@@ -230,8 +230,12 @@ export function createHandler(config: HandlerConfig) {
     : (config as HandlerConfigWithPrompt).systemPrompt;
 
   return async function POST(req: Request): Promise<Response> {
-    // Read per request: VERCEL_OIDC_TOKEN rotates
-    const apiKey = config.apiKey || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+    // Read per request: the OIDC token rotates. On Vercel it arrives as a
+    // request header; locally `vercel env pull` provides the env var.
+    const apiKey = config.apiKey
+      || process.env.AI_GATEWAY_API_KEY
+      || req.headers.get('x-vercel-oidc-token')
+      || process.env.VERCEL_OIDC_TOKEN;
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: 'AI Gateway not configured. Set AI_GATEWAY_API_KEY or VERCEL_OIDC_TOKEN.' }),
