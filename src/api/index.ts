@@ -2,7 +2,7 @@
  * API exports
  */
 
-// Main handler using OpenRouter (works with any model)
+// Main handler, routed through Vercel AI Gateway
 export { createHandler } from './createHandler';
 export type { HandlerConfig } from './createHandler';
 

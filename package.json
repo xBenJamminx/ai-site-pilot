@@ -1,7 +1,7 @@
 {
   "name": "ai-site-pilot",
   "version": "0.5.14",
-  "description": "AI chat widget that can control and navigate your website. Works with any AI model via OpenRouter.",
+  "description": "AI chat widget that can control and navigate your website. Works with any AI model through Vercel AI Gateway.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -44,7 +44,7 @@
     "chat",
     "chatbot",
     "site-pilot",
-    "openrouter",
+    "vercel-ai-gateway",
     "navigation",
     "react",
     "nextjs",

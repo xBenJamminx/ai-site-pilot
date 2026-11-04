@@ -7,7 +7,7 @@ This file helps AI coding assistants (Claude, GPT, Copilot) integrate ai-site-pi
 A drop-in AI chat widget that can **control and navigate websites**. The AI can execute tools to filter content, open modals, navigate sections, and more.
 
 **Key features:**
-- Works with any AI model via OpenRouter (Gemini, GPT-4, Claude, Llama)
+- Works with any AI model through Vercel AI Gateway
 - Fast & affordable with Gemini 2.5 Flash-Lite default
 - Auto-generates system prompts from site content
 - Streaming responses with tool execution
@@ -330,11 +330,11 @@ export function ChatWidget() {
 ### 5. Environment Variable
 
 ```bash
-# .env.local
-OPENROUTER_API_KEY=sk-or-...
+# .env.local (only needed off Vercel; or run `vercel env pull`)
+AI_GATEWAY_API_KEY=...
 ```
 
-Get your API key at [openrouter.ai](https://openrouter.ai) and add credits to your account.
+On Vercel, auth works automatically through `VERCEL_OIDC_TOKEN`. Never commit `.env.local` or pass the key to client code.
 
 ## Alternative: Manual System Prompt
 
@@ -556,4 +556,4 @@ Use `siteContent` to provide actual data about your site. The AI only knows what
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
 
-See all models at [openrouter.ai/models](https://openrouter.ai/models)
+See all models at [vercel.com/ai-gateway/models](https://vercel.com/ai-gateway/models)
