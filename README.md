@@ -5,7 +5,7 @@
 
 AI chat widget that can **control and navigate your website**. Unlike typical chatbots that just answer questions, Site Pilot can take actions—scroll to sections, open modals, filter content, and more.
 
-Works with any AI model (Gemini, GPT-4, Claude, Llama) via [OpenRouter](https://openrouter.ai).
+Works with any AI model through [Vercel AI Gateway](https://vercel.com/ai-gateway).
 
 ## Features
 
@@ -59,9 +59,9 @@ import 'ai-site-pilot/styles.css';
 
 ## Quick Start
 
-### 1. Get an OpenRouter API Key
+### 1. Set Up Vercel AI Gateway
 
-Sign up at [openrouter.ai](https://openrouter.ai) and get your API key. Add credits to your account for API usage.
+Enable [AI Gateway](https://vercel.com/ai-gateway) on your Vercel team. Deployed on Vercel, auth works automatically through `VERCEL_OIDC_TOKEN`. Locally, run `vercel env pull` or create an `AI_GATEWAY_API_KEY`.
 
 ### 2. Create the API Route
 
@@ -87,7 +87,7 @@ const navigateTool = defineTool({
 });
 
 export const POST = createHandler({
-  model: 'google/gemini-2.5-flash-lite',  // Or use any OpenRouter model
+  model: 'anthropic/claude-haiku-5.5',  // Any AI Gateway model ID
   systemPrompt: `You are a helpful assistant for our website.
 You can navigate users to different sections using the navigate tool.`,
   tools: [navigateTool],
@@ -126,9 +126,11 @@ export function ChatWidget() {
 ### 4. Add Environment Variable
 
 ```bash
-# .env.local
-OPENROUTER_API_KEY=sk-or-...
+# .env.local (only needed off Vercel; or run `vercel env pull`)
+AI_GATEWAY_API_KEY=...
 ```
+
+Never commit `.env.local` or expose the key to client code. The handler only reads it on the server.
 
 That's it!
 
@@ -138,12 +140,12 @@ Change the `model` string to use any model:
 
 | Model | ID | Notes |
 |-------|-----|-------|
-| Gemini 2.5 Flash-Lite | `google/gemini-2.5-flash-lite` | Fast, affordable (default) |
+| Claude Haiku 5.5 | `anthropic/claude-haiku-5.5` | Fast, reliable tool calls (default) |
 | GPT-4o | `openai/gpt-4o` | Best overall |
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
 
-See all models at [openrouter.ai/models](https://openrouter.ai/models)
+See all models at [vercel.com/ai-gateway/models](https://vercel.com/ai-gateway/models)
 
 ## API Reference
 
@@ -157,7 +159,7 @@ Creates a Next.js API route handler. You can use either `systemPrompt` (manual) 
 import { createHandler } from 'ai-site-pilot/api';
 
 export const POST = createHandler({
-  model: 'google/gemini-2.5-flash-lite',
+  model: 'anthropic/claude-haiku-5.5',
   siteContent: {
     name: 'Acme Dance Studio',
     type: 'dance studio',
@@ -202,12 +204,11 @@ createHandler({
   systemPrompt: '...',         // Or write your own prompt
 
   // Optional
-  apiKey: process.env.OPENROUTER_API_KEY,  // Uses env var by default
-  model: 'google/gemini-2.5-flash-lite',
+  apiKey: process.env.AI_GATEWAY_API_KEY,  // Defaults to AI_GATEWAY_API_KEY, then VERCEL_OIDC_TOKEN
+  model: 'anthropic/claude-haiku-5.5',
   tools: [myTool1, myTool2],
   temperature: 0.7,
-  siteUrl: 'https://mysite.com',  // Shown in OpenRouter dashboard
-  siteName: 'My Site',
+  maxTokens: 2048,
 });
 ```
 
@@ -321,7 +322,7 @@ const generateFallback = createFallbackMessageGenerator({
 - React 18+ or React 19
 - Next.js 13+ (for API routes)
 - Tailwind CSS (for responsive styles)
-- OpenRouter API key ([openrouter.ai](https://openrouter.ai))
+- Vercel AI Gateway access ([vercel.com/ai-gateway](https://vercel.com/ai-gateway))
 
 ## Troubleshooting
 

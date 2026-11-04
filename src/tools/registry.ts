@@ -181,38 +181,6 @@ export class ToolRegistry {
 
     return result;
   }
-
-  /**
-   * Convert to Gemini function declarations format
-   */
-  toGeminiFunctionDeclarations(): Array<{
-    name: string;
-    description: string;
-    parameters: {
-      type: 'object';
-      properties: Record<string, unknown>;
-      required: string[];
-    };
-  }> {
-    return this.getAll().map(tool => ({
-      name: tool.name,
-      description: tool.description,
-      parameters: {
-        type: 'object' as const,
-        properties: Object.fromEntries(
-          Object.entries(tool.parameters.properties).map(([key, value]) => [
-            key,
-            {
-              type: value.type,
-              description: value.description,
-              enum: value.enum,
-            },
-          ])
-        ),
-        required: tool.parameters.required,
-      },
-    }));
-  }
 }
 
 /**
