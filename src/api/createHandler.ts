@@ -184,9 +184,10 @@ async function streamGatewayResponse(
   }
 
   for (const [, toolCall] of pendingToolCalls) {
-    if (toolCall.name && toolCall.arguments) {
+    // No-argument tools may stream an empty arguments string
+    if (toolCall.name) {
       try {
-        const args = JSON.parse(toolCall.arguments);
+        const args = JSON.parse(toolCall.arguments || '{}');
         controller.enqueue(sse.encodeTool(toolCall.name, args));
       } catch (e) {
         console.error('Failed to parse tool arguments:', toolCall.arguments, e);
@@ -223,7 +224,7 @@ export function createHandler(config: HandlerConfig) {
     temperature = 0.7,
   } = config;
 
-  const model = config.model || 'google/gemini-2.5-flash-lite';
+  const model = config.model || 'anthropic/claude-haiku-5.5';
 
   const systemPrompt = 'siteContent' in config && config.siteContent
     ? generateSystemPrompt(config.siteContent)

@@ -8,7 +8,7 @@ A drop-in AI chat widget that can **control and navigate websites**. The AI can 
 
 **Key features:**
 - Works with any AI model through Vercel AI Gateway
-- Fast & affordable with Gemini 2.5 Flash-Lite default
+- Fast & affordable with Claude Haiku 5.5 default
 - Auto-generates system prompts from site content
 - Streaming responses with tool execution
 
@@ -249,7 +249,7 @@ const showServiceTool = defineTool({
 
 // Create handler with site content - prompt is auto-generated!
 export const POST = createHandler({
-  model: 'google/gemini-2.5-flash-lite',
+  model: 'anthropic/claude-haiku-5.5',
   siteContent: {
     name: 'Acme Dance Studio',
     type: 'dance studio',
@@ -342,7 +342,7 @@ If you need full control, use `systemPrompt` instead of `siteContent`:
 
 ```typescript
 export const POST = createHandler({
-  model: 'google/gemini-2.5-flash-lite',
+  model: 'anthropic/claude-haiku-5.5',
   systemPrompt: `You are an assistant for Acme Dance Studio.
 
 ## Classes
@@ -551,7 +551,7 @@ Use `siteContent` to provide actual data about your site. The AI only knows what
 
 | Model | ID | Notes |
 |-------|-----|-------|
-| Gemini 2.5 Flash-Lite | `google/gemini-2.5-flash-lite` | Fast, affordable (default) |
+| Claude Haiku 5.5 | `anthropic/claude-haiku-5.5` | Fast, reliable tool calls (default) |
 | GPT-4o | `openai/gpt-4o` | Best overall |
 | Claude 3.5 Sonnet | `anthropic/claude-3.5-sonnet` | Best for coding |
 | Llama 3.1 70B | `meta-llama/llama-3.1-70b-instruct` | Open source |
